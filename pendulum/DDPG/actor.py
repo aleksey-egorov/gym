@@ -1,4 +1,4 @@
-from keras import layers, models, optimizers
+from keras import layers, models, optimizers, regularizers, initializers
 from keras import backend as K
 
 
@@ -32,8 +32,11 @@ class Actor:
         states = layers.Input(shape=(self.state_size,), name='states')
 
         # Add hidden layers
-        net = layers.Dense(units=64, activation='relu')(states)
-        net = layers.Dense(units=64, activation='relu')(net)
+        initializer = initializers.VarianceScaling(scale=1.0, mode='fan_out', distribution='normal', seed=None)
+
+        net = layers.Dense(units=32, activation='elu', kernel_initializer=initializer)(states)
+        net = layers.Dense(units=32, activation='elu', kernel_initializer=initializer)(net)
+        #net = layers.Dense(units=16, activation='relu', kernel_regularizer=regularizers.l2(0.0001))(net)
         #net = layers.Dense(units=64, activation='relu')(net)
 
         # Try different layer sizes, activations, add batch normalization, regularizers, etc.
@@ -42,7 +45,7 @@ class Actor:
         raw_actions = layers.Dense(units=self.action_size, activation='sigmoid',
             name='raw_actions')(net)
 
-        # Scale [0, 1] output for each action dimension to proper range
+        # Scale [0, 1] output for each action dimension to proper range  (x * self.action_range) + self.action_low
         actions = layers.Lambda(lambda x: (x * self.action_range) + self.action_low,
             name='actions')(raw_actions)
 
@@ -51,13 +54,13 @@ class Actor:
 
         # Define loss function using action value (Q value) gradients
         action_gradients = layers.Input(shape=(self.action_size,))
-        loss = K.mean(-action_gradients * actions)
+        self.loss = K.mean(-action_gradients * actions)
 
         # Incorporate any additional losses here (e.g. from regularizers)
 
         # Define optimizer and training function
-        optimizer = optimizers.Adam()
-        updates_op = optimizer.get_updates(params=self.model.trainable_weights, loss=loss)
+        optimizer = optimizers.Adam(lr=0.001)
+        updates_op = optimizer.get_updates(params=self.model.trainable_weights, loss=self.loss)
         self.train_fn = K.function(
             inputs=[self.model.input, action_gradients, K.learning_phase()],
             outputs=[],

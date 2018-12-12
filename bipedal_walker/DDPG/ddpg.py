@@ -28,12 +28,12 @@ class DDPG():
 
         # Noise process
         self.exploration_mu = 0
-        self.exploration_theta = 0.45
-        self.exploration_sigma = 0.5
+        self.exploration_theta = 0.15
+        self.exploration_sigma = 0.2
         self.noise = OUNoise(self.action_size, self.exploration_mu, self.exploration_theta, self.exploration_sigma)
 
         # Replay memory
-        self.buffer_size = 100000
+        self.buffer_size = 500000
         self.batch_size = 16
         self.memory = ReplayBuffer(self.buffer_size, self.batch_size)
 
@@ -65,7 +65,7 @@ class DDPG():
         acts = self.actor_local.model.predict(state)[0]
 
         noise_coeff = 1
-        if step > 10000:
+        if step > 1000:
             noise_coeff = 0
 
         probs = list(acts + noise_coeff * self.noise.sample())  # add some noise for exploration
