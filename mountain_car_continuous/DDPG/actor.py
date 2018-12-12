@@ -34,12 +34,12 @@ class Actor:
         # Add hidden layers
         net = layers.Dense(units=64, activation='relu')(states)
         net = layers.Dense(units=64, activation='relu')(net)
-        net = layers.Dense(units=64, activation='relu')(net)
+
 
         # Try different layer sizes, activations, add batch normalization, regularizers, etc.
 
         # Add final output layer with sigmoid activation
-        raw_actions = layers.Dense(units=self.action_size, activation='tanh',
+        raw_actions = layers.Dense(units=self.action_size, activation='sigmoid',
             name='raw_actions')(net)
 
         # Scale [0, 1] output for each action dimension to proper range
