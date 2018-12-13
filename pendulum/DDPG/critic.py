@@ -28,18 +28,18 @@ class Critic:
         initializer = initializers.VarianceScaling(scale=1.0, mode='fan_in', distribution='normal', seed=None)
 
         # Add hidden layer(s) for state pathway   #, kernel_initializer=initializer, kernel_regularizer=regularizers.l2(0.001)
-        net_states = layers.Dense(units=16, activation='elu', kernel_initializer=initializer)(states)
+        net_states = layers.Dense(units=32, activation='elu', kernel_initializer=initializer)(states)
         #net_states = layers.Dense(units=16, activation='relu', kernel_initializer=initializer, kernel_regularizer=regularizers.l2(0.001))(net_states)
 
         # Add hidden layer(s) for action pathway
-        net_actions = layers.Dense(units=16, activation='elu', kernel_initializer=initializer)(actions)
+        net_actions = layers.Dense(units=32, activation='elu', kernel_initializer=initializer)(actions)
         #net_actions = layers.Dense(units=16, activation='relu', kernel_initializer=initializer, kernel_regularizer=regularizers.l2(0.001))(net_actions)
 
         # Try different layer sizes, activations, add batch normalization, regularizers, etc.
 
         # Combine state and action pathways
         net = layers.Add()([net_states, net_actions])
-        net = layers.Dense(units=16, activation='elu')(net)
+        net = layers.Dense(units=32, activation='elu')(net)
         net = layers.Dense(units=16, activation='elu')(net)
         #net = layers.Dense(units=16, activation='relu')(net)
         #net = layers.Activation('relu')(net)

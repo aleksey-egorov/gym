@@ -73,7 +73,7 @@ class DDPG():
 
         probs = list(acts + noise_coeff * self.noise.sample())  # add some noise for exploration
         #action = np.argmax(np.array(probs))
-        return probs
+        return probs, noise_coeff
 
     def learn(self, experiences):
         """Update policy and value parameters using given batch of experience tuples."""

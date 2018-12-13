@@ -27,18 +27,18 @@ class Critic:
         actions = layers.Input(shape=(self.action_size,), name='actions')
 
         # Add hidden layer(s) for state pathway
-        net_states = layers.Dense(units=64, activation='relu')(states)
-        net_states = layers.Dense(units=64, activation='relu')(net_states)
+        net_states = layers.Dense(units=64, activation='elu')(states)
+        net_states = layers.Dense(units=64, activation='elu')(net_states)
 
         # Add hidden layer(s) for action pathway
-        net_actions = layers.Dense(units=64, activation='relu')(actions)
-        net_actions = layers.Dense(units=64, activation='relu')(net_actions)
+        net_actions = layers.Dense(units=64, activation='elu')(actions)
+        net_actions = layers.Dense(units=64, activation='elu')(net_actions)
 
         # Try different layer sizes, activations, add batch normalization, regularizers, etc.
 
         # Combine state and action pathways
         net = layers.Add()([net_states, net_actions])
-        net = layers.Activation('relu')(net)
+        net = layers.Activation('elu')(net)
 
         # Add more layers to the combined network if needed
 
@@ -49,7 +49,7 @@ class Critic:
         self.model = models.Model(inputs=[states, actions], outputs=Q_values)
 
         # Define optimizer and compile model for training with built-in loss function
-        optimizer = optimizers.Adam()
+        optimizer = optimizers.Adam(lr=0.0001)
         self.model.compile(optimizer=optimizer, loss='mse')
 
         # Compute action gradients (derivative of Q values w.r.t. to actions)
