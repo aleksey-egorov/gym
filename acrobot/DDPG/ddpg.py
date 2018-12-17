@@ -13,6 +13,7 @@ class DDPG():
         self.action_size = task['action_size']
         self.action_low = task['action_low']
         self.action_high = task['action_high']
+        self.last_state = []
 
         # Actor (Policy) Model
         self.actor_local = Actor(self.state_size, self.action_size, self.action_low, self.action_high)
@@ -34,12 +35,13 @@ class DDPG():
 
         # Replay memory
         self.buffer_size = 100000
-        self.batch_size = 16
+        self.batch_size = 1024
         self.memory = ReplayBuffer(self.buffer_size, self.batch_size)
 
         # Algorithm parameters
         self.gamma = 0.99  # discount factor
-        self.tau = 0.01  # for soft update of target parameters
+        self.tau = 0.0001  # for soft update of target parameters
+        self.noise_base = 3000
 
     def reset_episode(self):
         self.noise.reset()
@@ -49,7 +51,8 @@ class DDPG():
 
     def step(self, action, reward, next_state, done):
          # Save experience / reward
-        self.memory.add(self.last_state, action, reward, next_state, done)
+        if not self.last_state == []:
+            self.memory.add(self.last_state, action, reward, next_state, done)
 
         # Learn, if enough samples are available in memory
         if len(self.memory) > self.batch_size:
@@ -64,18 +67,12 @@ class DDPG():
         state = np.reshape(state, [-1, self.state_size])
         acts = self.actor_local.model.predict(state)[0]
 
-        noise_coeff = 1
-        if step > 10000:
-            noise_coeff = 0
+        noise_coeff = (self.noise_base - step) / self.noise_base
+        if noise_coeff < 0.1:
+            noise_coeff = 0.1
 
         probs = list(acts + noise_coeff * self.noise.sample())  # add some noise for exploration
-        #if probs[0] > 0:
-        #    return 1
-        #else:
-        #    return 0
-        #print(probs)
-        return np.argmax(probs)
-        #return probs
+        return np.argmax(probs), probs, noise_coeff
 
     def learn(self, experiences):
         """Update policy and value parameters using given batch of experience tuples."""
