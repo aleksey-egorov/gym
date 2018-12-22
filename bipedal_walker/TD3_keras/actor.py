@@ -32,9 +32,9 @@ class Actor:
         states = layers.Input(shape=(self.state_size,), name='states')
 
         # Add hidden layers
-        initializer = initializers.VarianceScaling(scale=1.0, mode='fan_in', distribution='normal', seed=None)
-        net = layers.Dense(units=256, activation='elu', kernel_initializer=initializer, kernel_regularizer=regularizers.l2(0.5))(states)
-        net = layers.Dense(units=256, activation='elu', kernel_initializer=initializer, kernel_regularizer=regularizers.l2(0.5))(net)
+        #initializer = initializers.VarianceScaling(scale=1.0, mode='fan_in', distribution='normal', seed=None)
+        net = layers.Dense(units=256, activation='relu')(states)
+        net = layers.Dense(units=256, activation='relu')(net)
         #net = layers.Dense(units=256, activation='relu', kernel_initializer=initializer)(net)
 
         # Try different layer sizes, activations, add batch normalization, regularizers, etc.
@@ -58,7 +58,7 @@ class Actor:
         # Incorporate any additional losses here (e.g. from regularizers)
 
         # Define optimizer and training function
-        optimizer = optimizers.Adam(lr=0.00001)
+        optimizer = optimizers.Adam(lr=0.0001)
         updates_op = optimizer.get_updates(params=self.model.trainable_weights, loss=loss)
         self.train_fn = K.function(
             inputs=[self.model.input, action_gradients, K.learning_phase()],
