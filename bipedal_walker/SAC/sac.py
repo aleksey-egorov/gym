@@ -7,6 +7,7 @@ from torch.optim import Adam
 from SAC.utils import soft_update, hard_update
 from SAC.model import GaussianPolicy, QNetwork, ValueNetwork, DeterministicPolicy
 
+device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
 class SAC(object):
     def __init__(self, num_inputs, action_space, args):
@@ -19,30 +20,30 @@ class SAC(object):
         self.policy_type = args['policy']
         self.target_update_interval = args['target_update_interval']
 
-        self.critic = QNetwork(self.num_inputs, self.action_space, args['hidden_size'])
+        self.critic = QNetwork(self.num_inputs, self.action_space, args['hidden_size']).to(device)
         self.critic_optim = Adam(self.critic.parameters(), lr=args['lr'])
         self.soft_q_criterion = nn.MSELoss()
 
         if self.policy_type == "Gaussian":
-            self.policy = GaussianPolicy(self.num_inputs, self.action_space, args['hidden_size'])
+            self.policy = GaussianPolicy(self.num_inputs, self.action_space, args['hidden_size']).to(device)
             self.policy_optim = Adam(self.policy.parameters(), lr=args['lr'])
 
-            self.value = ValueNetwork(self.num_inputs, args['hidden_size'])
-            self.value_target = ValueNetwork(self.num_inputs, args['hidden_size'])
+            self.value = ValueNetwork(self.num_inputs, args['hidden_size']).to(device)
+            self.value_target = ValueNetwork(self.num_inputs, args['hidden_size']).to(device)
             self.value_optim = Adam(self.value.parameters(), lr=args['lr'])
             hard_update(self.value_target, self.value)
             self.value_criterion = nn.MSELoss()
         else:
-            self.policy = DeterministicPolicy(self.num_inputs, self.action_space, args['hidden_size'])
+            self.policy = DeterministicPolicy(self.num_inputs, self.action_space, args['hidden_size']).to(device)
             self.policy_optim = Adam(self.policy.parameters(), lr=args['lr'])
 
-            self.critic_target = QNetwork(self.num_inputs, self.action_space, args['hidden_size'])
+            self.critic_target = QNetwork(self.num_inputs, self.action_space, args['hidden_size']).to(device)
             hard_update(self.critic_target, self.critic)
 
 
 
     def select_action(self, state, eval=False):
-        state = torch.FloatTensor(state).unsqueeze(0)
+        state = torch.cuda.FloatTensor(state).unsqueeze(0)
         if eval == False:
             self.policy.train()
             action, _, _, _, _ = self.policy.evaluate(state)
@@ -57,11 +58,11 @@ class SAC(object):
 
 
     def update_parameters(self, state_batch, action_batch, reward_batch, next_state_batch, mask_batch, updates):
-        state_batch = torch.FloatTensor(state_batch)
-        next_state_batch = torch.FloatTensor(next_state_batch)
-        action_batch = torch.FloatTensor(action_batch)
-        reward_batch = torch.FloatTensor(reward_batch)
-        mask_batch = torch.FloatTensor(np.float32(mask_batch))
+        state_batch = torch.cuda.FloatTensor(state_batch)
+        next_state_batch = torch.cuda.FloatTensor(next_state_batch)
+        action_batch = torch.cuda.FloatTensor(action_batch)
+        reward_batch = torch.cuda.FloatTensor(reward_batch)
+        mask_batch = torch.cuda.FloatTensor(np.float32(mask_batch))
 
         reward_batch = reward_batch.unsqueeze(1)  # reward_batch = [batch_size, 1]
         mask_batch = mask_batch.unsqueeze(1)  # mask_batch = [batch_size, 1]
