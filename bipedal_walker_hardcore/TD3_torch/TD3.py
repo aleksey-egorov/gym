@@ -17,15 +17,15 @@ class Actor(nn.Module):
         #self.l3 = nn.Linear(512, action_dim)
 
         layers = []
-        layers.append(nn.Linear(state_dim, 512))
+        layers.append(nn.Linear(state_dim, 768))
         layers.append(nn.Dropout(dropout))
         layers.append(activation_fn)
 
-        layers.append(nn.Linear(512, 512))
+        layers.append(nn.Linear(768, 768))
         layers.append(nn.Dropout(dropout))
         layers.append(activation_fn)
 
-        layers.append(nn.Linear(512, action_dim))
+        layers.append(nn.Linear(768, action_dim))
 
         self.model = nn.Sequential(*layers)
         self.max_action = max_action
@@ -38,24 +38,40 @@ class Actor(nn.Module):
 class Critic(nn.Module):
     def __init__(self, state_dim, action_dim):
         super(Critic, self).__init__()
+
+        dropout = 0.3
+        activation_fn = nn.ReLU()
         
-        self.l1 = nn.Linear(state_dim + action_dim, 512)
-        self.l2 = nn.Linear(512, 512)
-        self.l3 = nn.Linear(512, 1)
+        #self.l1 = nn.Linear(state_dim + action_dim, 512)
+        #self.l2 = nn.Linear(512, 512)
+        #self.l3 = nn.Linear(512, 1)
+
+        layers = []
+        layers.append(nn.Linear(state_dim + action_dim, 768))
+        layers.append(nn.Dropout(dropout))
+        layers.append(activation_fn)
+
+        layers.append(nn.Linear(768, 768))
+        layers.append(nn.Dropout(dropout))
+        layers.append(activation_fn)
+
+        layers.append(nn.Linear(768, 1))
+        self.model = nn.Sequential(*layers)
         
     def forward(self, state, action):
         state_action = torch.cat([state, action], 1)
-        
-        q = F.relu(self.l1(state_action))
-        q = F.relu(self.l2(q))
-        q = self.l3(q)
+
+        q = self.model(state_action)
         return q
     
 class TD3:
     def __init__(self, state_dim, action_dim, max_action):
 
         self.lr = 0.0001
-        
+        self.actor_loss = None
+        self.loss_Q1 = None
+        self.loss_Q2 = None
+
         self.actor = Actor(state_dim, action_dim, max_action).to(device)
         self.actor_target = Actor(state_dim, action_dim, max_action).to(device)
         self.actor_target.load_state_dict(self.actor.state_dict())
@@ -102,26 +118,26 @@ class TD3:
             
             # Optimize Critic 1:
             current_Q1 = self.critic_1(state, action)
-            loss_Q1 = F.mse_loss(current_Q1, target_Q)
+            self.loss_Q1 = F.mse_loss(current_Q1, target_Q)
             self.critic_1_optimizer.zero_grad()
-            loss_Q1.backward()
+            self.loss_Q1.backward()
             self.critic_1_optimizer.step()
             
             # Optimize Critic 2:
             current_Q2 = self.critic_2(state, action)
-            loss_Q2 = F.mse_loss(current_Q2, target_Q)
+            self.loss_Q2 = F.mse_loss(current_Q2, target_Q)
             self.critic_2_optimizer.zero_grad()
-            loss_Q2.backward()
+            self.loss_Q2.backward()
             self.critic_2_optimizer.step()
             
             # Delayed policy updates:
             if i % policy_delay == 0:
                 # Compute actor loss:
-                actor_loss = -self.critic_1(state, self.actor(state)).mean()
+                self.actor_loss = -self.critic_1(state, self.actor(state)).mean()
                 
                 # Optimize the actor
                 self.actor_optimizer.zero_grad()
-                actor_loss.backward()
+                self.actor_loss.backward()
                 self.actor_optimizer.step()
                 
                 # Polyak averaging update:

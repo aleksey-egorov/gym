@@ -5,6 +5,10 @@ class ReplayBuffer:
         self.buffer = []
         self.max_length = max_length
 
+    def get_fill(self):
+        fill = 100 * len(self.buffer) / self.max_length
+        return fill
+
     def add(self, transition):
         # transiton is tuple of (state, action, reward, next_state, done)
         if len(self.buffer) > self.max_length:
