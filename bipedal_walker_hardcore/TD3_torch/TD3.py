@@ -39,7 +39,7 @@ class Critic(nn.Module):
     def __init__(self, state_dim, action_dim):
         super(Critic, self).__init__()
 
-        dropout = 0.3
+        dropout = 0.2
         activation_fn = nn.ReLU()
         
         #self.l1 = nn.Linear(state_dim + action_dim, 512)
@@ -65,9 +65,8 @@ class Critic(nn.Module):
         return q
     
 class TD3:
-    def __init__(self, state_dim, action_dim, max_action):
+    def __init__(self, state_dim, action_dim, max_action, lr=0.0001):
 
-        self.lr = 0.0001
         self.actor_loss = None
         self.loss_Q1 = None
         self.loss_Q2 = None
@@ -75,19 +74,24 @@ class TD3:
         self.actor = Actor(state_dim, action_dim, max_action).to(device)
         self.actor_target = Actor(state_dim, action_dim, max_action).to(device)
         self.actor_target.load_state_dict(self.actor.state_dict())
-        self.actor_optimizer = optim.Adam(self.actor.parameters(), lr=self.lr)
         
         self.critic_1 = Critic(state_dim, action_dim).to(device)
         self.critic_1_target = Critic(state_dim, action_dim).to(device)
         self.critic_1_target.load_state_dict(self.critic_1.state_dict())
-        self.critic_1_optimizer = optim.Adam(self.critic_1.parameters(), lr=self.lr)
         
         self.critic_2 = Critic(state_dim, action_dim).to(device)
         self.critic_2_target = Critic(state_dim, action_dim).to(device)
         self.critic_2_target.load_state_dict(self.critic_2.state_dict())
-        self.critic_2_optimizer = optim.Adam(self.critic_2.parameters(), lr=self.lr)
         
         self.max_action = max_action
+        self.set_optimizers(lr)
+
+    def set_optimizers(self, lr):
+        self.lr = lr
+        self.actor_optimizer = optim.Adam(self.actor.parameters(), lr=self.lr)
+        self.critic_1_optimizer = optim.Adam(self.critic_1.parameters(), lr=self.lr)
+        self.critic_2_optimizer = optim.Adam(self.critic_2.parameters(), lr=self.lr)
+
     
     def select_action(self, state):
         state = torch.FloatTensor(state.reshape(1, -1)).to(device)
