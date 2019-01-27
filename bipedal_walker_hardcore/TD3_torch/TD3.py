@@ -9,7 +9,7 @@ class Actor(nn.Module):
     def __init__(self, state_dim, action_dim, max_action):
         super(Actor, self).__init__()
 
-        dropout = 0.3
+        dropout = 0.2
         activation_fn = nn.ReLU()
         
         #self.l1 = nn.Linear(state_dim, 512)
@@ -17,15 +17,19 @@ class Actor(nn.Module):
         #self.l3 = nn.Linear(512, action_dim)
 
         layers = []
-        layers.append(nn.Linear(state_dim, 768))
+        layers.append(nn.Linear(state_dim, 512))
         layers.append(nn.Dropout(dropout))
         layers.append(activation_fn)
 
-        layers.append(nn.Linear(768, 768))
+        layers.append(nn.Linear(512, 512))
         layers.append(nn.Dropout(dropout))
         layers.append(activation_fn)
 
-        layers.append(nn.Linear(768, action_dim))
+        layers.append(nn.Linear(512, 256))
+        layers.append(nn.Dropout(dropout))
+        layers.append(activation_fn)
+
+        layers.append(nn.Linear(256, action_dim))
 
         self.model = nn.Sequential(*layers)
         self.max_action = max_action
@@ -47,15 +51,15 @@ class Critic(nn.Module):
         #self.l3 = nn.Linear(512, 1)
 
         layers = []
-        layers.append(nn.Linear(state_dim + action_dim, 768))
+        layers.append(nn.Linear(state_dim + action_dim, 512))
         layers.append(nn.Dropout(dropout))
         layers.append(activation_fn)
 
-        layers.append(nn.Linear(768, 768))
+        layers.append(nn.Linear(512, 512))
         layers.append(nn.Dropout(dropout))
         layers.append(activation_fn)
 
-        layers.append(nn.Linear(768, 1))
+        layers.append(nn.Linear(512, 1))
         self.model = nn.Sequential(*layers)
         
     def forward(self, state, action):
@@ -91,7 +95,6 @@ class TD3:
         self.actor_optimizer = optim.Adam(self.actor.parameters(), lr=self.lr)
         self.critic_1_optimizer = optim.Adam(self.critic_1.parameters(), lr=self.lr)
         self.critic_2_optimizer = optim.Adam(self.critic_2.parameters(), lr=self.lr)
-
     
     def select_action(self, state):
         state = torch.FloatTensor(state.reshape(1, -1)).to(device)
