@@ -17,19 +17,19 @@ class Actor(nn.Module):
         #self.l3 = nn.Linear(512, action_dim)
 
         layers = []
-        layers.append(nn.Linear(state_dim, 512))
-        layers.append(nn.Dropout(dropout))
+        layers.append(nn.Linear(state_dim, 256))
+        #layers.append(nn.Dropout(dropout))
         layers.append(activation_fn)
 
-        layers.append(nn.Linear(512, 512))
-        layers.append(nn.Dropout(dropout))
+        layers.append(nn.Linear(256, 256))
+        #layers.append(nn.Dropout(dropout))
         layers.append(activation_fn)
 
-        layers.append(nn.Linear(512, 256))
-        layers.append(nn.Dropout(dropout))
+        layers.append(nn.Linear(256, 128))
+        #layers.append(nn.Dropout(dropout))
         layers.append(activation_fn)
 
-        layers.append(nn.Linear(256, action_dim))
+        layers.append(nn.Linear(128, action_dim))
 
         self.model = nn.Sequential(*layers)
         self.max_action = max_action
@@ -51,15 +51,19 @@ class Critic(nn.Module):
         #self.l3 = nn.Linear(512, 1)
 
         layers = []
-        layers.append(nn.Linear(state_dim + action_dim, 512))
-        layers.append(nn.Dropout(dropout))
+        layers.append(nn.Linear(state_dim + action_dim, 256))
+        #layers.append(nn.Dropout(dropout))
         layers.append(activation_fn)
 
-        layers.append(nn.Linear(512, 512))
-        layers.append(nn.Dropout(dropout))
+        layers.append(nn.Linear(256, 256))
+        #layers.append(nn.Dropout(dropout))
         layers.append(activation_fn)
 
-        layers.append(nn.Linear(512, 1))
+        layers.append(nn.Linear(256, 128))
+        #layers.append(nn.Dropout(dropout))
+        layers.append(activation_fn)
+
+        layers.append(nn.Linear(128, 1))
         self.model = nn.Sequential(*layers)
         
     def forward(self, state, action):
