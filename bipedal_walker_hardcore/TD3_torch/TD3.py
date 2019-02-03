@@ -21,15 +21,15 @@ class Actor(nn.Module):
         #layers.append(nn.Dropout(dropout))
         layers.append(activation_fn)
 
-        layers.append(nn.Linear(256, 256))
+        layers.append(nn.Linear(256, 320))
+        layers.append(nn.Dropout(dropout))
+        layers.append(activation_fn)
+
+        layers.append(nn.Linear(320, 160))
         #layers.append(nn.Dropout(dropout))
         layers.append(activation_fn)
 
-        layers.append(nn.Linear(256, 128))
-        #layers.append(nn.Dropout(dropout))
-        layers.append(activation_fn)
-
-        layers.append(nn.Linear(128, action_dim))
+        layers.append(nn.Linear(160, action_dim))
 
         self.model = nn.Sequential(*layers)
         self.max_action = max_action
@@ -55,15 +55,15 @@ class Critic(nn.Module):
         #layers.append(nn.Dropout(dropout))
         layers.append(activation_fn)
 
-        layers.append(nn.Linear(256, 256))
+        layers.append(nn.Linear(256, 320))
         #layers.append(nn.Dropout(dropout))
         layers.append(activation_fn)
 
-        layers.append(nn.Linear(256, 128))
+        layers.append(nn.Linear(320, 160))
         #layers.append(nn.Dropout(dropout))
         layers.append(activation_fn)
 
-        layers.append(nn.Linear(128, 1))
+        layers.append(nn.Linear(160, 1))
         self.model = nn.Sequential(*layers)
         
     def forward(self, state, action):
