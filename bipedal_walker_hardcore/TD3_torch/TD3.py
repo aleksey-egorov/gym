@@ -6,7 +6,7 @@ import torch.optim as optim
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
 class Actor(nn.Module):
-    def __init__(self, state_dim, action_dim, max_action):
+    def __init__(self, actor_config, max_action):
         super(Actor, self).__init__()
 
         dropout = 0.2
@@ -17,26 +17,18 @@ class Actor(nn.Module):
         #self.l3 = nn.Linear(512, action_dim)
 
         layers = []
-        layers.append(nn.Linear(state_dim, 256))
-        #layers.append(nn.Dropout(dropout))
-        layers.append(activation_fn)
 
-        layers.append(nn.Linear(256, 320))
-        layers.append(nn.Dropout(dropout))
-        layers.append(activation_fn)
-
-        layers.append(nn.Linear(320, 160))
-       # layers.append(nn.Dropout(dropout))
-        layers.append(activation_fn)
-
-        layers.append(nn.Linear(160, 64))
-        # layers.append(nn.Dropout(dropout))
-        layers.append(activation_fn)
-
-        layers.append(nn.Linear(64, action_dim))
+        for layer in actor_config:
+            layers.append(nn.Linear(layer['dim'][0], layer['dim'][1]))
+            if layer['dropout'] == True:
+                layers.append(nn.Dropout(dropout))
+            if layer['activation'] == 'relu':
+                layers.append(nn.ReLU())
 
         self.model = nn.Sequential(*layers)
         self.max_action = max_action
+
+        print ("ACTOR={}".format(self.model))
         
     def forward(self, state):
         a = self.model(state)
@@ -77,14 +69,14 @@ class Critic(nn.Module):
         return q
     
 class TD3:
-    def __init__(self, state_dim, action_dim, max_action, lr=0.0001):
+    def __init__(self, actor_config, state_dim, action_dim, max_action, lr=0.0001):
 
         self.actor_loss = None
         self.loss_Q1 = None
         self.loss_Q2 = None
 
-        self.actor = Actor(state_dim, action_dim, max_action).to(device)
-        self.actor_target = Actor(state_dim, action_dim, max_action).to(device)
+        self.actor = Actor(actor_config, max_action).to(device)
+        self.actor_target = Actor(actor_config, max_action).to(device)
         self.actor_target.load_state_dict(self.actor.state_dict())
         
         self.critic_1 = Critic(state_dim, action_dim).to(device)
