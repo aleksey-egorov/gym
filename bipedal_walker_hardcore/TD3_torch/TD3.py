@@ -3,29 +3,15 @@ import torch.nn as nn
 import torch.nn.functional as F
 import torch.optim as optim
 
+from TD3_torch.models import FullyConnected
+
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
 class Actor(nn.Module):
     def __init__(self, actor_config, max_action):
         super(Actor, self).__init__()
 
-        dropout = 0.2
-        activation_fn = nn.ReLU()
-        
-        #self.l1 = nn.Linear(state_dim, 512)
-        #self.l2 = nn.Linear(512, 512)
-        #self.l3 = nn.Linear(512, action_dim)
-
-        layers = []
-
-        for layer in actor_config:
-            layers.append(nn.Linear(layer['dim'][0], layer['dim'][1]))
-            if layer['dropout'] == True:
-                layers.append(nn.Dropout(dropout))
-            if layer['activation'] == 'relu':
-                layers.append(nn.ReLU())
-
-        self.model = nn.Sequential(*layers)
+        self.model = FullyConnected(actor_config).create()
         self.max_action = max_action
 
         print ("ACTOR={}".format(self.model))
@@ -36,31 +22,31 @@ class Actor(nn.Module):
         return a
         
 class Critic(nn.Module):
-    def __init__(self, state_dim, action_dim):
+    def __init__(self, critic_config):
         super(Critic, self).__init__()
 
-        dropout = 0.2
-        activation_fn = nn.ReLU()
+        #dropout = 0.2
+       # activation_fn = nn.ReLU()
         
-        #self.l1 = nn.Linear(state_dim + action_dim, 512)
-        #self.l2 = nn.Linear(512, 512)
-        #self.l3 = nn.Linear(512, 1)
 
-        layers = []
-        layers.append(nn.Linear(state_dim + action_dim, 256))
+
+        #layers = []
+       # layers.append(nn.Linear(state_dim + action_dim, 256))
         #layers.append(nn.Dropout(dropout))
-        layers.append(activation_fn)
+        #layers.append(activation_fn)
 
-        layers.append(nn.Linear(256, 320))
+       # layers.append(nn.Linear(256, 320))
         #layers.append(nn.Dropout(dropout))
-        layers.append(activation_fn)
+       # layers.append(activation_fn)
 
-        layers.append(nn.Linear(320, 160))
+       ## layers.append(nn.Linear(320, 160))
         #layers.append(nn.Dropout(dropout))
-        layers.append(activation_fn)
+        #layers.append(activation_fn)
 
-        layers.append(nn.Linear(160, 1))
-        self.model = nn.Sequential(*layers)
+        #layers.append(nn.Linear(160, 1))
+
+        self.model = FullyConnected(critic_config).create()
+        print("CRITIC={}".format(self.model))
         
     def forward(self, state, action):
         state_action = torch.cat([state, action], 1)
@@ -69,7 +55,7 @@ class Critic(nn.Module):
         return q
     
 class TD3:
-    def __init__(self, actor_config, state_dim, action_dim, max_action, lr=0.0001):
+    def __init__(self, actor_config, critic_config, max_action, lr=0.0001):
 
         self.actor_loss = None
         self.loss_Q1 = None
@@ -79,12 +65,12 @@ class TD3:
         self.actor_target = Actor(actor_config, max_action).to(device)
         self.actor_target.load_state_dict(self.actor.state_dict())
         
-        self.critic_1 = Critic(state_dim, action_dim).to(device)
-        self.critic_1_target = Critic(state_dim, action_dim).to(device)
+        self.critic_1 = Critic(critic_config).to(device)
+        self.critic_1_target = Critic(critic_config).to(device)
         self.critic_1_target.load_state_dict(self.critic_1.state_dict())
         
-        self.critic_2 = Critic(state_dim, action_dim).to(device)
-        self.critic_2_target = Critic(state_dim, action_dim).to(device)
+        self.critic_2 = Critic(critic_config).to(device)
+        self.critic_2_target = Critic(critic_config).to(device)
         self.critic_2_target.load_state_dict(self.critic_2.state_dict())
         
         self.max_action = max_action
