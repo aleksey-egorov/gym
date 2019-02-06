@@ -14,6 +14,8 @@ class FullyConnected(nn.Module):
                 layers.append(nn.Dropout(self.dropout_default))
             if layer['activation'] == 'relu':
                 layers.append(nn.ReLU())
+            if layer['activation'] == 'tanh':
+                layers.append(nn.Tanh())
 
         return nn.Sequential(*layers)
 

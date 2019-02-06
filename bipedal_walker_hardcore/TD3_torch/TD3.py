@@ -25,11 +25,6 @@ class Critic(nn.Module):
     def __init__(self, critic_config):
         super(Critic, self).__init__()
 
-        #dropout = 0.2
-       # activation_fn = nn.ReLU()
-        
-
-
         #layers = []
        # layers.append(nn.Linear(state_dim + action_dim, 256))
         #layers.append(nn.Dropout(dropout))
