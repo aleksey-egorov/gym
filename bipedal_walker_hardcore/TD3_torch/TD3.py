@@ -17,8 +17,7 @@ class Actor(nn.Module):
         print ("ACTOR={}".format(self.model))
         
     def forward(self, state):
-        a = self.model(state)
-        a = torch.tanh(a) * self.max_action
+        a = self.model(state) * self.max_action
         return a
         
 class Critic(nn.Module):
@@ -143,10 +142,10 @@ class TD3:
         torch.save(self.actor.state_dict(), '%s/%s_actor.pth' % (directory, name))
         torch.save(self.actor_target.state_dict(), '%s/%s_actor_target.pth' % (directory, name))
         
-        torch.save(self.critic_1.state_dict(), '%s/%s_crtic_1.pth' % (directory, name))
+        torch.save(self.critic_1.state_dict(), '%s/%s_critic_1.pth' % (directory, name))
         torch.save(self.critic_1_target.state_dict(), '%s/%s_critic_1_target.pth' % (directory, name))
         
-        torch.save(self.critic_2.state_dict(), '%s/%s_crtic_2.pth' % (directory, name))
+        torch.save(self.critic_2.state_dict(), '%s/%s_critic_2.pth' % (directory, name))
         torch.save(self.critic_2_target.state_dict(), '%s/%s_critic_2_target.pth' % (directory, name))
 
     def load(self, directory, name):
@@ -155,10 +154,10 @@ class TD3:
             self.actor.load_state_dict(torch.load('%s/%s_actor.pth' % (directory, name)))
             self.actor_target.load_state_dict(torch.load('%s/%s_actor_target.pth' % (directory, name)))
 
-            self.critic_1.load_state_dict(torch.load('%s/%s_crtic_1.pth' % (directory, name)))
+            self.critic_1.load_state_dict(torch.load('%s/%s_critic_1.pth' % (directory, name)))
             self.critic_1_target.load_state_dict(torch.load('%s/%s_critic_1_target.pth' % (directory, name)))
 
-            self.critic_2.load_state_dict(torch.load('%s/%s_crtic_2.pth' % (directory, name)))
+            self.critic_2.load_state_dict(torch.load('%s/%s_critic_2.pth' % (directory, name)))
             self.critic_2_target.load_state_dict(torch.load('%s/%s_critic_2_target.pth' % (directory, name)))
 
             print("Models loaded")

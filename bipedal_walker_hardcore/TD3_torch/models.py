@@ -12,6 +12,7 @@ class FullyConnected(nn.Module):
             layers.append(nn.Linear(layer['dim'][0], layer['dim'][1]))
             if layer['dropout'] == True:
                 layers.append(nn.Dropout(self.dropout_default))
+
             if layer['activation'] == 'relu':
                 layers.append(nn.ReLU())
             if layer['activation'] == 'tanh':
