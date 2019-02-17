@@ -52,8 +52,12 @@ class TD3:
     def __init__(self, actor_config, critic_config, max_action, lr=0.0001):
 
         self.actor_loss = None
-        self.loss_Q1 = None
-        self.loss_Q2 = None
+        self.Q1_loss = None
+        self.Q2_loss = None
+
+        self.actor_loss_list = []
+        self.Q1_loss_list = []
+        self.Q2_loss_list = []
 
         self.actor = Actor(actor_config, max_action).to(device)
         self.actor_target = Actor(actor_config, max_action).to(device)
@@ -105,22 +109,26 @@ class TD3:
             
             # Optimize Critic 1:
             current_Q1 = self.critic_1(state, action)
-            self.loss_Q1 = F.mse_loss(current_Q1, target_Q)
+            self.Q1_loss = F.mse_loss(current_Q1, target_Q)
             self.critic_1_optimizer.zero_grad()
-            self.loss_Q1.backward()
+            self.Q1_loss.backward()
             self.critic_1_optimizer.step()
+            self.Q1_loss_list.append(self.Q1_loss.item())
             
             # Optimize Critic 2:
             current_Q2 = self.critic_2(state, action)
-            self.loss_Q2 = F.mse_loss(current_Q2, target_Q)
+            self.Q2_loss = F.mse_loss(current_Q2, target_Q)
             self.critic_2_optimizer.zero_grad()
-            self.loss_Q2.backward()
+            self.Q2_loss.backward()
             self.critic_2_optimizer.step()
+            self.Q2_loss_list.append(self.Q2_loss.item())
             
             # Delayed policy updates:
             if i % policy_delay == 0:
                 # Compute actor loss:
-                self.actor_loss = -self.critic_1(state, self.actor(state)).mean()
+                #self.actor_loss = -self.critic_1(state, self.actor(state)).mean()
+                self.actor_loss = - 0.5 * (self.critic_1(state, self.actor(state)).mean() + self.critic_2(state, self.actor(state)).mean())
+                self.actor_loss_list.append(self.actor_loss.item())
                 
                 # Optimize the actor
                 self.actor_optimizer.zero_grad()
