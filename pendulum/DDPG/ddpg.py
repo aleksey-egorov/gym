@@ -40,8 +40,7 @@ class DDPG():
 
         # Algorithm parameters
         self.gamma = 0.99  # discount factor
-        self.tau = 0.001  # for soft update of target parameters
-        self.noise_base = 3000
+        self.tau = 0.0001  # for soft update of target parameters
 
     def reset_episode(self):
         self.noise.reset()
@@ -62,17 +61,16 @@ class DDPG():
         # Roll over last state and action
         self.last_state = next_state
 
-    def act(self, state, step):
+
+    def act(self, state, noise_coeff):
         """Returns actions for given state(s) as per current policy."""
         state = np.reshape(state, [-1, self.state_size])
         acts = self.actor_local.model.predict(state)[0]
 
-        noise_coeff = (self.noise_base - step) / self.noise_base
-        if noise_coeff < 0.1:
-            noise_coeff = 0.1
-
         probs = list(acts + noise_coeff * self.noise.sample())  # add some noise for exploration
-        return probs, noise_coeff
+        result = probs, probs
+        #print ("RESULT={}".format(result))
+        return probs
 
     def learn(self, experiences):
         """Update policy and value parameters using given batch of experience tuples."""
