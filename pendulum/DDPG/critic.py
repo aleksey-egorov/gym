@@ -40,7 +40,7 @@ class Critic:
         # Combine state and action pathways
         net = layers.Add()([net_states, net_actions])
         net = layers.Dense(units=32, activation='elu')(net)
-        net = layers.Dense(units=16, activation='elu')(net)
+        net = layers.Dense(units=32, activation='elu')(net)
         #net = layers.Dense(units=16, activation='relu')(net)
         #net = layers.Activation('relu')(net)
 
@@ -53,7 +53,7 @@ class Critic:
         self.model = models.Model(inputs=[states, actions], outputs=Q_values)
 
         # Define optimizer and compile model for training with built-in loss function
-        optimizer = optimizers.Adam(lr=0.0001)
+        optimizer = optimizers.Adam(lr=0.00001)
         self.model.compile(optimizer=optimizer, loss='mse')
 
         # Compute action gradients (derivative of Q values w.r.t. to actions)

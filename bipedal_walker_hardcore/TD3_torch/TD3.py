@@ -3,51 +3,11 @@ import torch.nn as nn
 import torch.nn.functional as F
 import torch.optim as optim
 
-from TD3_torch.models import FullyConnected
+from TD3_torch.models import Actor, Critic
+
 
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
-class Actor(nn.Module):
-    def __init__(self, actor_config, max_action):
-        super(Actor, self).__init__()
-
-        self.model = FullyConnected(actor_config).create()
-        self.max_action = max_action
-
-        print ("ACTOR={}".format(self.model))
-        
-    def forward(self, state):
-        a = self.model(state) * self.max_action
-        return a
-        
-class Critic(nn.Module):
-    def __init__(self, critic_config):
-        super(Critic, self).__init__()
-
-        #layers = []
-       # layers.append(nn.Linear(state_dim + action_dim, 256))
-        #layers.append(nn.Dropout(dropout))
-        #layers.append(activation_fn)
-
-       # layers.append(nn.Linear(256, 320))
-        #layers.append(nn.Dropout(dropout))
-       # layers.append(activation_fn)
-
-       ## layers.append(nn.Linear(320, 160))
-        #layers.append(nn.Dropout(dropout))
-        #layers.append(activation_fn)
-
-        #layers.append(nn.Linear(160, 1))
-
-        self.model = FullyConnected(critic_config).create()
-        print("CRITIC={}".format(self.model))
-        
-    def forward(self, state, action):
-        state_action = torch.cat([state, action], 1)
-
-        q = self.model(state_action)
-        return q
-    
 class TD3:
     def __init__(self, actor_config, critic_config, max_action, lr=0.0001):
 
@@ -172,21 +132,6 @@ class TD3:
         except:
             print("No models to load")
 
-    def load2(self, directory, name):
-        self.actor.load_state_dict(torch.load('%s/%s_actor.pth' % (directory, name), map_location=lambda storage, loc: storage))
-        self.actor_target.load_state_dict(torch.load('%s/%s_actor_target.pth' % (directory, name), map_location=lambda storage, loc: storage))
-
-        self.critic_1.load_state_dict(torch.load('%s/%s_crtic_1.pth' % (directory, name), map_location=lambda storage, loc: storage))
-        self.critic_1_target.load_state_dict(torch.load('%s/%s_critic_1_target.pth' % (directory, name), map_location=lambda storage, loc: storage))
-
-        self.critic_2.load_state_dict(torch.load('%s/%s_crtic_2.pth' % (directory, name), map_location=lambda storage, loc: storage))
-        self.critic_2_target.load_state_dict(torch.load('%s/%s_critic_2_target.pth' % (directory, name), map_location=lambda storage, loc: storage))
-
-        
-    def load_actor(self, directory, name):
-        self.actor.load_state_dict(torch.load('%s/%s_actor.pth' % (directory, name), map_location=lambda storage, loc: storage))
-        self.actor_target.load_state_dict(torch.load('%s/%s_actor_target.pth' % (directory, name), map_location=lambda storage, loc: storage))
-        
         
         
       
