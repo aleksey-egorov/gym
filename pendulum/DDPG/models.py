@@ -25,6 +25,7 @@ class Critic(nn.Module):
         super(Critic, self).__init__()
 
         self.model = FullyConnected(critic_config).create()
+
         print("CRITIC={}".format(self.model))
 
     def forward(self, state, action):

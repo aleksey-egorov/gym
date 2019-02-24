@@ -1,3 +1,4 @@
+import os
 import numpy as np
 
 class ReplayBuffer:
@@ -31,5 +32,11 @@ class ReplayBuffer:
             done.append(np.array(d, copy=False))
         
         return np.array(state), np.array(action), np.array(reward), np.array(next_state), np.array(done)
-    
-  
+
+
+
+def mkdir(base, name):
+    path = os.path.join(base, name)
+    if not os.path.exists(path):
+        os.makedirs(path)
+    return path
