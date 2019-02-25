@@ -1,4 +1,6 @@
+import os
 import numpy as np
+
 
 class ReplayBuffer:
     def __init__(self, max_length=10000):
@@ -14,11 +16,14 @@ class ReplayBuffer:
         if len(self.buffer) > self.max_length:
             self.buffer.pop(0)
         self.buffer.append(transition)
-    
+
+    def count(self):
+        return len(self.buffer)
+
     def sample(self, batch_size):
         indexes = np.random.randint(0, len(self.buffer), size=batch_size)
         state, action, reward, next_state, done = [], [], [], [], []
-        
+
         for i in indexes:
             s, a, r, s_, d = self.buffer[i]
             state.append(np.array(s, copy=False))
@@ -26,7 +31,12 @@ class ReplayBuffer:
             reward.append(np.array(r, copy=False))
             next_state.append(np.array(s_, copy=False))
             done.append(np.array(d, copy=False))
-        
+
         return np.array(state), np.array(action), np.array(reward), np.array(next_state), np.array(done)
-    
-  
+
+
+def mkdir(base, name):
+    path = os.path.join(base, name)
+    if not os.path.exists(path):
+        os.makedirs(path)
+    return path
