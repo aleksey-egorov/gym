@@ -33,6 +33,8 @@ class TD3:
         self.critic_2_target = Critic(critic_config).to(device)
         self.critic_2_target.load_state_dict(self.critic_2.state_dict())
 
+        self.max_loss_list = 100
+
 
     def set_optimizers(self, lr):
         self.lr = lr
@@ -44,11 +46,11 @@ class TD3:
         state = torch.FloatTensor(state.reshape(1, -1)).to(device)
         return self.actor(state).cpu().data.numpy().flatten()
     
-    def update(self, replay_buffer, n_iter, batch_size, gamma, polyak, policy_noise, noise_clip, policy_delay):
+    def update(self, replay_buffer, n_iter, batch_size, gamma, polyak, policy_noise, noise_clip, policy_delay, beta):
         
         for i in range(n_iter):
             # Sample a batch of transitions from replay buffer:
-            state, action_, reward, next_state, done = replay_buffer.sample(batch_size)
+            state, action_, reward, next_state, done, weights, indexes = replay_buffer.sample(batch_size, beta)
             state = torch.FloatTensor(state).to(device)
             action = torch.FloatTensor(action_).to(device)
             reward = torch.FloatTensor(reward).reshape((batch_size,1)).to(device)
@@ -131,6 +133,16 @@ class TD3:
             print("Models loaded")
         except:
             print("No models to load")
+
+    def truncate_loss_lists(self):
+        if len(self.actor_loss_list) > self.max_loss_list:
+            self.actor_loss_list.pop(0)
+        if len(self.Q1_loss_list) > self.max_loss_list:
+            self.Q1_loss_list.pop(0)
+        if len(self.Q2_loss_list) > self.max_loss_list:
+            self.Q2_loss_list.pop(0)
+
+
 
         
         

@@ -17,7 +17,6 @@ class Actor(nn.Module):
 
     def forward(self, state):
         a = self.model(state)
-        a = (a * self.action_range) + self.action_low
         return a
 
 
