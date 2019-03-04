@@ -21,19 +21,18 @@ log_interval = 10           # print avg reward after interval
 
 
 actor_config = [
-    {'dim': (None, 256), 'dropout': False, 'activation': 'relu'},
-    {'dim': (256, 256), 'dropout': True, 'activation': 'relu'},
-    {'dim': (256, 128), 'dropout': False, 'activation': 'relu'},
-    {'dim': (128, None), 'dropout': False, 'activation': 'tanh'}
+    {'dim': [None, 256], 'dropout': False, 'activation': 'relu'},
+    {'dim': [256, 256], 'dropout': True, 'activation': 'relu'},
+    {'dim': [256, 128], 'dropout': False, 'activation': 'relu'},
+    {'dim': [128, None], 'dropout': False, 'activation': 'tanh'}
 ]
 
 critic_config = [
-    {'dim': (None, 512), 'dropout': False, 'activation': 'relu'},
-    {'dim': (512, 512), 'dropout': False, 'activation': 'relu'},
-    {'dim': (512, 128), 'dropout': False, 'activation': 'relu'},
-    {'dim': (128, 1), 'dropout': False, 'activation': False},
+    {'dim': [None, 512], 'dropout': False, 'activation': 'relu'},
+    {'dim': [512, 512], 'dropout': False, 'activation': 'relu'},
+    {'dim': [512, 128], 'dropout': False, 'activation': 'relu'},
+    {'dim': [128, 1], 'dropout': False, 'activation': False},
 ]
-
 
 
 agent = TD3_PER_Trainer(env_name, actor_config, critic_config, random_seed=random_seed, lr_base=lr_base, lr_decay=lr_decay,
