@@ -19,18 +19,20 @@ max_timesteps = 2000        # max timesteps in one episode
 max_buffer_length = 3000000
 log_interval = 10           # print avg reward after interval
 
+
 actor_config = [
-    {'dim': [None, 400], 'dropout': False, 'activation': 'relu'},
-    {'dim': [400, 300], 'dropout': False, 'activation': 'relu'},
-    {'dim': [300, None], 'dropout': False, 'activation': 'tanh'}
+    {'dim': (None, 256), 'dropout': False, 'activation': 'relu'},
+    {'dim': (256, 256), 'dropout': True, 'activation': 'relu'},
+    {'dim': (256, 128), 'dropout': False, 'activation': 'relu'},
+    {'dim': (128, None), 'dropout': False, 'activation': 'tanh'}
 ]
 
 critic_config = [
-    {'dim': [None, 400], 'dropout': False, 'activation': 'relu'},
-    {'dim': [400, 300], 'dropout': False, 'activation': 'relu'},
-    {'dim': [300, 1], 'dropout': False, 'activation': False}
+    {'dim': (None, 512), 'dropout': False, 'activation': 'relu'},
+    {'dim': (512, 512), 'dropout': False, 'activation': 'relu'},
+    {'dim': (512, 128), 'dropout': False, 'activation': 'relu'},
+    {'dim': (128, 1), 'dropout': False, 'activation': False},
 ]
-
 
 
 
