@@ -154,10 +154,13 @@ class DQN_Conv_Trainer():
                 print("Training time: {:6.2f} sec".format(training_time))
                 break
 
-    def test(self, episodes=3, render=True, save_gif=True):
+    def test(self, episodes=3, save_gif=True):
 
         gifdir = mkdir('.', 'gif')
         algdir = mkdir(gifdir, self.algorithm_name)
+
+        # loading models
+        self.policy.load(self.directory, self.filename)
 
         for episode in range(1, episodes + 1):
             ep_reward = 0.0
