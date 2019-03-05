@@ -14,11 +14,33 @@ polyak = 0.9999              # target policy update parameter (1-tau)
 policy_noise = 0.2          # target policy smoothing noise
 noise_clip = 0.5
 policy_delay = 2            # delayed policy updates parameter
+#alpha=0.9
+#beta_base=0.3
+#beta_multiplier=0.0003
+
+
 max_episodes = 10000         # max num of episodes
 max_timesteps = 2000        # max timesteps in one episode
 max_buffer_length = 4000000
 log_interval = 10           # print avg reward after interval
 
+
+'''
+actor_config = [
+        {'dim': (state_dim, 256), 'dropout': False, 'activation': 'relu'},
+        {'dim': (256, 320), 'dropout': True, 'activation':'relu'},
+        {'dim': (320, 160), 'dropout': False, 'activation': 'relu'},
+        {'dim': (160, 64), 'dropout': False, 'activation': 'relu'},
+        {'dim': (64, action_dim),'dropout': False, 'activation': 'tanh'}
+    ]
+    
+    critic_config = [
+        {'dim': (state_dim + action_dim, 256), 'dropout': False, 'activation': 'relu'},
+        {'dim': (256, 320), 'dropout': False , 'activation':'relu'},
+        {'dim': (320, 160), 'dropout': False, 'activation': 'relu'},
+        {'dim': (160, 1), 'dropout': False, 'activation': False}
+    ]
+'''
 
 actor_config = [
     {'dim': [None, 256], 'dropout': False, 'activation': 'relu'},
