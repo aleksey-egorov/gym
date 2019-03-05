@@ -38,5 +38,5 @@ config = [conv_config, fc_config]
 agent = DQN_Conv_Trainer(env_name, config, random_seed=random_seed, lr_base=lr_base, lr_decay=lr_decay,
                    epsilon_base=epsilon_base, epsilon_decay=epsilon_decay, gamma=gamma, batch_size=batch_size,
                    max_episodes=max_episodes, max_timesteps=max_timesteps,
-                   max_buffer_length=max_buffer_length, log_interval=log_interval)
+                   max_buffer_length=max_buffer_length, log_interval=log_interval, threshold=threshold)
 agent.train()
