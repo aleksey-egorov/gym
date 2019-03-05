@@ -9,12 +9,12 @@ device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
 
 class DQN_Conv:
-    def __init__(self, env, config):
+    def __init__(self, env, input_shape, n_actions, config):
         self.env = env
         self.Q_loss_list = []
 
-        self.net = Network(config, device)
-        self.net_target = Network(config, device)
+        self.net = Network(input_shape, n_actions, config, device)
+        self.net_target = Network(input_shape, n_actions, config, device)
 
         self.target_update_interval = 1000
         self.max_loss_list = 100
@@ -35,16 +35,16 @@ class DQN_Conv:
         return action
 
     def update(self, buffer, t, batch_size, gamma):
+        if buffer.len() > batch_size:
+            if t % self.target_update_interval == 0:
+                self.net_target.load_state_dict(self.net.state_dict())
 
-        if t % self.target_update_interval == 0:
-            self.net_target.load_state_dict(self.net.state_dict())
-
-        self.net_optimizer.zero_grad()
-        batch = buffer.sample(batch_size)
-        loss_t = self._calc_loss(batch, gamma)
-        loss_t.backward()
-        self.net_optimizer.step()
-        self.Q_loss_list.append(loss_t.item())
+            self.net_optimizer.zero_grad()
+            batch = buffer.sample(batch_size)
+            loss_t = self._calc_loss(batch, gamma)
+            loss_t.backward()
+            self.net_optimizer.step()
+            self.Q_loss_list.append(loss_t.item())
 
     def _calc_loss(self, batch, gamma):
         states, actions, rewards, next_states, dones = batch
@@ -60,6 +60,7 @@ class DQN_Conv:
         next_state_values = self.net_target(next_states_v).max(1)[0]
         next_state_values[done_mask] = 0.0
         next_state_values = next_state_values.detach()
+
 
         expected_state_action_values = (next_state_values * gamma + rewards_v).to(device)
         return nn.MSELoss()(state_action_values, expected_state_action_values)

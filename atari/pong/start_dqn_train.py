@@ -22,13 +22,14 @@ sync_target_frames = 1000
 
 
 conv_config = [
-    {'dim': [3,16], 'kernel': 5, 'stride': 2, 'batch_norm': True, 'activation': 'relu'},
-    {'dim': [16,32], 'kernel': 5, 'stride': 2, 'batch_norm': True, 'activation': 'relu'},
-    {'dim': [32,32], 'kernel': 5, 'stride': 2, 'batch_norm': True, 'activation': 'relu'},
+    {'dim': [None, 32], 'kernel': 8, 'stride': 4, 'batch_norm': False, 'activation': 'relu'},
+    {'dim': [32, 64], 'kernel': 4, 'stride': 2, 'batch_norm': False, 'activation': 'relu'},
+    {'dim': [64, 64], 'kernel': 3, 'stride': 1, 'batch_norm': False, 'activation': 'relu'},
 ]
 
 fc_config = [
-        {'dim': [448, None], 'dropout': False, 'activation': False}
+        {'dim': [None, 512], 'dropout': False, 'activation': 'relu'},
+        {'dim': [512, None], 'dropout': False, 'activation': False},
     ]
 config = [conv_config, fc_config]
 

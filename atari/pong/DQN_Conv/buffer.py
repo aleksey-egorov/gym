@@ -18,7 +18,7 @@ class ReplayBuffer(object):
         self._maxsize = size
         self._next_idx = 0
 
-    def __len__(self):
+    def len(self):
         return len(self._storage)
 
     def get_fill(self):

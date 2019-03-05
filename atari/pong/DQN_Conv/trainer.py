@@ -5,6 +5,7 @@ import numpy as np
 from gym import wrappers
 from PIL import Image
 
+from DQN_Conv import wrappers
 from DQN_Conv.dqn import DQN_Conv
 from DQN_Conv.utils import mkdir
 from DQN_Conv.buffer import ReplayBuffer
@@ -20,15 +21,11 @@ class DQN_Conv_Trainer():
 
         self.algorithm_name = 'dqn_conv'
         self.env_name = env_name
-        self.env = gym.make(env_name)
+        self.env = wrappers.make_env(env_name) #gym.make(env_name)
         self.record_videos = record_videos
         self.record_interval = record_interval
-        if self.record_videos == True:
-            videos_dir = mkdir('.', 'videos')
-            monitor_dir = mkdir(videos_dir, self.algorithm_name)
-            should_record = lambda i: self.should_record
-            self.env = wrappers.Monitor(self.env, monitor_dir, video_callable=should_record, force=True)
-        self.state_dim = self.env.observation_space.shape[0]
+
+        self.state_dim = self.env.observation_space.shape
         self.action_dim = self.env.action_space.n
         self.should_record = False
         if not threshold == None:
@@ -38,7 +35,8 @@ class DQN_Conv_Trainer():
 
         self.config = config
         #self.fc_config[0]['dim'][0] = self.state_dim
-        self.config[1][-1]['dim'][1] = self.action_dim
+        #self.config[1][-1]['dim'][1] = self.action_dim
+        self.input_shape = (self.state_dim, self.action_dim)
 
         self.random_seed = random_seed
         self.lr_base = lr_base
@@ -58,7 +56,7 @@ class DQN_Conv_Trainer():
         self.directory = mkdir(prdir, self.algorithm_name)
         self.filename = "{}_{}_{}".format(self.algorithm_name, self.env_name, self.random_seed)
 
-        self.policy = DQN_Conv(self.env, config)
+        self.policy = DQN_Conv(self.env, self.state_dim, self.action_dim, config)
         self.replay_buffer = ReplayBuffer(size=self.max_buffer_length)
 
         self.reward_history = []
