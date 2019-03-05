@@ -21,16 +21,16 @@ class TD3:
         self.Q1_loss_list = []
         self.Q2_loss_list = []
 
-        self.actor = Actor(actor_config, action_low, action_high).to(device)
-        self.actor_target = Actor(actor_config, action_low, action_high).to(device)
+        self.actor = Actor(actor_config, action_low, action_high, device)
+        self.actor_target = Actor(actor_config, action_low, action_high, device)
         self.actor_target.load_state_dict(self.actor.state_dict())
         
-        self.critic_1 = Critic(critic_config).to(device)
-        self.critic_1_target = Critic(critic_config).to(device)
+        self.critic_1 = Critic(critic_config, device)
+        self.critic_1_target = Critic(critic_config, device)
         self.critic_1_target.load_state_dict(self.critic_1.state_dict())
         
-        self.critic_2 = Critic(critic_config).to(device)
-        self.critic_2_target = Critic(critic_config).to(device)
+        self.critic_2 = Critic(critic_config, device)
+        self.critic_2_target = Critic(critic_config, device)
         self.critic_2_target.load_state_dict(self.critic_2.state_dict())
 
         self.max_loss_list = 100

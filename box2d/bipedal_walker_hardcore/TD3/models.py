@@ -2,18 +2,16 @@ import torch
 import torch.nn as nn
 
 
-device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
-
 class Actor(nn.Module):
-    def __init__(self, actor_config, action_low, action_high):
+    def __init__(self, actor_config, action_low, action_high, device):
         super(Actor, self).__init__()
 
-        self.model = FullyConnected(actor_config).create()
+        self.model = FullyConnected(actor_config).create().to(device)
         self.action_low = torch.FloatTensor(action_low).to(device)
         self.action_high = torch.FloatTensor(action_high).to(device)
         self.action_range = self.action_high - self.action_low
 
-        print("ACTOR={}".format(self.model))
+        print("ACTOR: {} device: {}".format(self.model, device))
 
     def forward(self, state):
         a = self.model(state)
@@ -21,12 +19,12 @@ class Actor(nn.Module):
 
 
 class Critic(nn.Module):
-    def __init__(self, critic_config):
+    def __init__(self, critic_config, device):
         super(Critic, self).__init__()
 
-        self.model = FullyConnected(critic_config).create()
+        self.model = FullyConnected(critic_config).create().to(device)
 
-        print("CRITIC={}".format(self.model))
+        print("CRITIC: {}  device: {}".format(self.model, device))
 
     def forward(self, state, action):
         state_action = torch.cat([state, action], 1)
