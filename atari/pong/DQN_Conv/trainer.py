@@ -1,4 +1,4 @@
-import gym
+import os
 import time
 import torch
 import numpy as np
@@ -34,9 +34,6 @@ class DQN_Conv_Trainer():
             self.threshold = self.env.spec.reward_threshold
 
         self.config = config
-        #self.fc_config[0]['dim'][0] = self.state_dim
-        #self.config[1][-1]['dim'][1] = self.action_dim
-        self.input_shape = (self.state_dim, self.action_dim)
 
         self.random_seed = random_seed
         self.lr_base = lr_base
@@ -51,6 +48,8 @@ class DQN_Conv_Trainer():
         self.max_timesteps = max_timesteps
         self.max_buffer_length = max_buffer_length
         self.log_interval = log_interval
+
+        self.log_dir = mkdir('.', 'log')
 
         prdir = mkdir('.', 'preTrained')
         self.directory = mkdir(prdir, self.algorithm_name)
@@ -79,7 +78,7 @@ class DQN_Conv_Trainer():
         self.policy.load(self.directory, self.filename)
 
         # logging variables:
-        log_f = open("train_{}.txt".format(self.algorithm_name), "w+")
+        log_f = open(os.path.join(self.log_dir, "train_{}_{}.txt".format(self.algorithm_name, self.random_seed)), "w+")
 
         print("Training started ... ")
 

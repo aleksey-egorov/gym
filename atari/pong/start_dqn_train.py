@@ -10,7 +10,6 @@ epsilon_decay = 0.002
 random_seed = 43
 gamma = 0.99                # discount for future rewards
 batch_size = 32       # num of transitions sampled from replay buffer
-polyak = 0.999               # target policy update parameter (1-tau)
 max_episodes = 10000         # max num of episodes
 max_timesteps = 3000        # max timesteps in one episode
 max_buffer_length = 50000
