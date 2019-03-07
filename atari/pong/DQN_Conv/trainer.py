@@ -48,7 +48,6 @@ class DQN_Conv_Trainer():
         self.max_timesteps = max_timesteps
         self.max_buffer_length = max_buffer_length
         self.log_interval = log_interval
-
         self.log_dir = mkdir('.', 'log')
 
         prdir = mkdir('.', 'preTrained')
@@ -147,10 +146,11 @@ class DQN_Conv_Trainer():
                 print("########## Solved! ###########")
                 name = self.filename + '_solved'
                 self.policy.save(self.directory, name)
-                log_f.close()
-                self.env.close()
                 training_time = time.time() - start_time
                 print("Training time: {:6.2f} sec".format(training_time))
+                log_f.write("Training time: {:6.2f} sec".format(training_time))
+                log_f.close()
+                self.env.close()
                 break
 
     def test(self, episodes=3, save_gif=True):
