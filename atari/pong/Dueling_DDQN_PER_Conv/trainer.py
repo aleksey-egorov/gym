@@ -6,22 +6,21 @@ from gym import wrappers
 from PIL import Image
 from tensorboardX import SummaryWriter
 
-from DQN_Conv import wrappers
-from DQN_Conv.dqn import DQN_Conv
-from DQN_Conv.utils import mkdir
-from DQN_Conv.buffer import ReplayBuffer
+from Dueling_DDQN_PER_Conv import wrappers
+from Dueling_DDQN_PER_Conv.ddqn import Dueling_DDQN_PER_Conv
+from Dueling_DDQN_PER_Conv.utils import mkdir
+from Dueling_DDQN_PER_Conv.buffer import PrioritizedReplayBuffer
 
 
-class DQN_Conv_Trainer():
+class Dueling_DDQN_PER_Conv_Trainer():
 
     def __init__(self, env_name, config, random_seed=42, lr_base=0.001, lr_decay=0.00005,
                  epsilon_base=0.3, epsilon_decay=0.0001, gamma=0.99, batch_size=1024,
                  max_episodes=100000, max_timesteps=3000, max_buffer_length=5000000,
                  log_interval=5, threshold=None, lr_minimum=1e-10, epsilon_minimum=1e-10,
-                 log_dir='./log/'
-                 ):
+                 alpha=0.9, beta_base=0.3, beta_multiplier=0.0001, log_dir='./log/'):
 
-        self.algorithm_name = 'dqn_conv'
+        self.algorithm_name = 'duel_ddqn_conv'
         self.env_name = env_name
         self.env = wrappers.make_env(env_name) #gym.make(env_name)
         self.log_dir = os.path.join(log_dir, self.algorithm_name)
@@ -45,6 +44,11 @@ class DQN_Conv_Trainer():
         self.epsilon_minimum = epsilon_minimum
         self.gamma = gamma
         self.batch_size = batch_size
+
+        self.alpha = alpha
+        self.beta_base = beta_base
+        self.beta_multiplier = beta_multiplier
+
         self.max_episodes = max_episodes
         self.max_timesteps = max_timesteps
         self.max_buffer_length = max_buffer_length
@@ -54,8 +58,8 @@ class DQN_Conv_Trainer():
         self.directory = mkdir(prdir, self.algorithm_name)
         self.filename = "{}_{}_{}".format(self.algorithm_name, self.env_name, self.random_seed)
 
-        self.policy = DQN_Conv(self.env, self.state_dim, self.action_dim, config)
-        self.replay_buffer = ReplayBuffer(size=self.max_buffer_length)
+        self.policy = Dueling_DDQN_PER_Conv(self.env, self.state_dim, self.action_dim, config)
+        self.replay_buffer = PrioritizedReplayBuffer(size=self.max_buffer_length, alpha=self.alpha)
 
         self.reward_history = []
         self.make_plots = False
@@ -88,6 +92,7 @@ class DQN_Conv_Trainer():
             # calculate params
             epsilon = max(self.epsilon_base / (1.0 + episode * self.epsilon_decay), self.epsilon_minimum)
             learning_rate = max(self.lr_base / (1.0 + episode * self.lr_decay), self.lr_minimum)
+            beta = min(self.beta_base + episode * self.beta_multiplier, 1)
             self.policy.set_optimizers(lr=learning_rate)
 
             for t in range(self.max_timesteps):
@@ -97,7 +102,7 @@ class DQN_Conv_Trainer():
                 self.replay_buffer.add(state, action, reward, next_state, float(done))
 
                 # Updating policy
-                self.policy.update(self.replay_buffer, t, self.batch_size, self.gamma)
+                self.policy.update(self.replay_buffer, t, self.batch_size, self.gamma, beta)
 
                 state = next_state
                 ep_reward += reward
@@ -128,6 +133,7 @@ class DQN_Conv_Trainer():
             self.writer.add_scalar("reward", ep_reward, episode)
             self.writer.add_scalar("avg_reward", avg_reward, episode)
             self.writer.add_scalar("avg_loss", avg_Q_loss, episode)
+
 
             # if avg reward > threshold then save and stop traning:
             if avg_reward >= self.threshold and episode > 100:
