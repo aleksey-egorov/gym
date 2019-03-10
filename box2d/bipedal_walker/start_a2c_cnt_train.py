@@ -2,19 +2,18 @@ from A2C_Cnt.trainer import A2C_Cnt_Trainer
 
 
 env_name = 'BipedalWalker-v2'
-lr_base = 0.001
+lr_base = 0.0001
 lr_decay = 0.0001
 
 random_seed = 42
 gamma = 0.99                # discount for future rewards
 batch_size = 32        # num of transitions sampled from replay buffer
-entropy_beta = 1e-4
+entropy_beta = 0.0005
 test_iters = 10000
-reward_steps = 1
+reward_steps = 2
 
 max_episodes = 10000         # max num of episodes
 max_timesteps = 2000        # max timesteps in one episode
-max_buffer_length = 4000000
 log_interval = 10           # print avg reward after interval
 
 
