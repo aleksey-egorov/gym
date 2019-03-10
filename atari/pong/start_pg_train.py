@@ -11,14 +11,13 @@ random_seed = 43
 gamma = 0.99                # discount for future rewards
 batch_size = 32       # num of transitions sampled from replay buffer
 
-entropy_beta = 0.01
-bellman_steps = 100
+entropy_beta = 0.05
+bellman_steps = 250
 baseline_steps = 50000
 
 max_episodes = 10000         # max num of episodes
 max_timesteps = 3000        # max timesteps in one episode
-max_buffer_length = 40000
-min_buffer_length = 10000
+
 log_interval = 10           # print avg reward after interval
 threshold = 19.5
 
