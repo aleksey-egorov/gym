@@ -1,5 +1,16 @@
+import os
+import time
+import torch
 import gym
-from TD3.utils import PrioritizedReplayBuffer, mkdir
+import numpy as np
+from gym import wrappers
+from PIL import Image
+from tensorboardX import SummaryWriter
+
+from TD3_PER.td3 import TD3_PER
+from TD3_PER.utils import mkdir
+from TD3_PER.buffer import PrioritizedReplayBuffer
+
 
 class TD3_PER_Trainer():
 
@@ -8,11 +19,14 @@ class TD3_PER_Trainer():
                  polyak=0.9999, policy_noise=0.2, noise_clip=0.5, policy_delay=2,
                  max_episodes=100000, max_timesteps=3000, max_buffer_length=5000000,
                  log_interval=5, threshold=None, lr_minimum=1e-10, exp_noise_minimum=1e-10,
-                 record_videos=True, record_interval=100, alpha=0.9, beta_base=0.3, beta_multiplier=0.0001):
+                 record_videos=True, record_interval=100, alpha=0.9, beta_base=0.3, beta_multiplier=0.0001, log_dir='./log/'):
 
         self.algorithm_name = 'td3'
         self.env_name = env_name
         self.env = gym.make(env_name)
+        self.log_dir = os.path.join(log_dir, self.algorithm_name)
+        self.writer = SummaryWriter(log_dir=self.log_dir, comment=self.algorithm_name + "_" + self.env_name)
+
         self.record_videos = record_videos
         self.record_interval = record_interval
         if self.record_videos == True:
@@ -65,7 +79,7 @@ class TD3_PER_Trainer():
         self.directory = mkdir(prdir, self.algorithm_name)
         self.filename = "{}_{}_{}".format(self.algorithm_name, self.env_name, self.random_seed)
 
-        self.policy = TD3(self.actor_config, self.critic_config, self.action_low, self.action_high)
+        self.policy = TD3_PER(self.actor_config, self.critic_config, self.action_low, self.action_high)
         self.replay_buffer = PrioritizedReplayBuffer(size=self.max_buffer_length, alpha=self.alpha)
 
         self.reward_history = []
@@ -87,9 +101,6 @@ class TD3_PER_Trainer():
 
         # loading models
         self.policy.load(self.directory, self.filename)
-
-        # logging variables:
-        log_f = open("train_{}.txt".format(self.algorithm_name), "w+")
 
         print("Training started ... \n")
 
@@ -133,9 +144,6 @@ class TD3_PER_Trainer():
             self.reward_history.append(ep_reward)
             avg_reward = np.mean(self.reward_history[-100:])
 
-            # logging updates:
-            log_f.write('{},{}\n'.format(episode, ep_reward))
-            log_f.flush()
 
             # Calculate polyak
             # part = (env.spec.reward_threshold - avg_reward) / (env.spec.reward_threshold + 150)
@@ -175,7 +183,6 @@ class TD3_PER_Trainer():
                 print("########## Solved! ###########")
                 name = self.filename + '_solved'
                 self.policy.save(self.directory, name)
-                log_f.close()
                 training_time = time.time() - start_time
                 print("Training time: {:6.2f} sec".format(training_time))
                 break

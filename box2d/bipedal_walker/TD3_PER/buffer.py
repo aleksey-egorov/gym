@@ -1,17 +1,7 @@
-import os
 import numpy as np
 import random
 
 from baselines.common.segment_tree import SumSegmentTree, MinSegmentTree
-
-
-
-def mkdir(base, name):
-    path = os.path.join(base, name)
-    if not os.path.exists(path):
-        os.makedirs(path)
-    return path
-
 
 
 class ReplayBuffer(object):
