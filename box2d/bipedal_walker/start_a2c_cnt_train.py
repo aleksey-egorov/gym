@@ -8,13 +8,13 @@ lr_decay = 0.0001
 random_seed = 42
 gamma = 0.99                # discount for future rewards
 batch_size = 32        # num of transitions sampled from replay buffer
-entropy_beta = 0.0005
+entropy_beta = 0.0001
 test_iters = 10000
 reward_steps = 2
-hidden_size = 256
+hidden_size = 512
 
 max_episodes = 10000         # max num of episodes
-max_timesteps = 2000        # max timesteps in one episode
+max_timesteps = 5000        # max timesteps in one episode
 log_interval = 10           # print avg reward after interval
 
 
