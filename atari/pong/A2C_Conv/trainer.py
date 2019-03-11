@@ -12,26 +12,26 @@ from A2C_Conv.utils import mkdir
 
 
 
-class A2C_Cnt_Trainer():
+class A2C_Conv_Trainer():
 
-    def __init__(self, env_name, env_num=10, hidden_size=256, random_seed=42, lr_base=0.001, lr_decay=0.00005,
-                 batch_size=32, bellman_steps=4, clip_grad=0.1, max_episodes=10000, max_timesteps=10000, entropy_beta=1e-4, gamma=0.99, reward_steps=2,
+    def __init__(self, env_name, num_envs=10, hidden_size=256, random_seed=42, lr_base=0.001, lr_decay=0.00005,
+                 batch_size=32, max_episodes=10000, max_timesteps=10000,
+                 entropy_beta=1e-4, gamma=0.99, bellman_steps=4, clip_grad=0.1,
                  log_interval=5, threshold=None, test_iters=10000, lr_minimum=1e-10,
                  log_dir='./log/'):
 
-        self.algorithm_name = 'a2c'
+        self.algorithm_name = 'a2c_conv'
         self.env_name = env_name
-        self.env_num = env_num
+        self.num_envs = num_envs
         self.make_env = lambda: ptan.common.wrappers.wrap_dqn(gym.make(self.env_name))
-        self.envs = [self.make_env() for _ in range(self.env_num)]
+        self.envs = [self.make_env() for _ in range(self.num_envs)]
+        self.env = self.envs[0]
 
         self.log_dir = os.path.join(log_dir, self.algorithm_name)
         self.writer = SummaryWriter(log_dir=self.log_dir, comment=self.algorithm_name + "_" + self.env_name)
 
-        self.state_dim = self.env.observation_space.shape[0]
-        self.action_dim = self.env.action_space.shape[0]
-        self.action_low = self.env.action_space.low
-        self.action_high = self.env.action_space.high
+        self.state_dim = self.env.observation_space.shape
+        self.action_dim = self.env.action_space.n
         if not threshold == None:
             self.threshold = threshold
         else:
@@ -79,7 +79,6 @@ class A2C_Cnt_Trainer():
         print("Action_space: {}".format(self.env.action_space))
         print("Obs_space: {}".format(self.env.observation_space))
         print("Threshold: {}".format(self.threshold))
-        print("action_low: {} action_high: {} \n".format(self.action_low, self.action_high))
 
         # loading models
         self.policy.load(self.directory, self.filename)

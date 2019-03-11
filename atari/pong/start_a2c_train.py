@@ -1,25 +1,24 @@
-from PG_Conv.trainer import PG_Conv_Trainer
+from A2C_Conv.trainer import A2C_Conv_Trainer
 
 
 env_name = "PongNoFrameskip-v4"
 lr_base = 0.0001
 lr_decay = 0.0001
-epsilon_base = 1.0
-epsilon_decay = 0.002
 
 random_seed = 43
 gamma = 0.99                # discount for future rewards
 batch_size = 32       # num of transitions sampled from replay buffer
 
-entropy_beta = 0.05
-bellman_steps = 250
-baseline_steps = 50000
+entropy_beta = 0.01
+bellman_steps = 4
+num_envs = 50
+clip_grad = 0.1
 
 max_episodes = 10000         # max num of episodes
 max_timesteps = 3000        # max timesteps in one episode
-
 log_interval = 10           # print avg reward after interval
 threshold = 19.5
+
 
 
 conv_config = [
@@ -34,11 +33,11 @@ fc_config = [
 config = [conv_config, fc_config]
 
 
-agent = PG_Conv_Trainer(env_name, config, random_seed=random_seed, lr_base=lr_base, lr_decay=lr_decay,
+agent = A2C_Conv_Trainer(env_name,  random_seed=random_seed, lr_base=lr_base, lr_decay=lr_decay,
                    gamma=gamma, batch_size=batch_size,
                    max_episodes=max_episodes, max_timesteps=max_timesteps,
-                   log_interval=log_interval, entropy_beta=entropy_beta, bellman_steps=bellman_steps,
-                   baseline_steps=baseline_steps, threshold=threshold
+                   log_interval=log_interval, entropy_beta=entropy_beta, bellman_steps=bellman_steps, num_envs=num_envs,
+                   clip_grad=clip_grad, threshold=threshold
                    )
 agent.train()
 
