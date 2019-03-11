@@ -3,24 +3,24 @@ import torch.nn as nn
 
 
 class A2C_Model(nn.Module):
-    def __init__(self, obs_size, act_size):
+    def __init__(self, obs_size, act_size, hidden_size):
         super(A2C_Model, self).__init__()
 
-        HID_SIZE = 128
-
         self.base = nn.Sequential(
-            nn.Linear(obs_size, HID_SIZE),
+            nn.Linear(obs_size, hidden_size),
             nn.ReLU(),
         )
         self.mu = nn.Sequential(
-            nn.Linear(HID_SIZE, act_size),
+            nn.Linear(hidden_size, act_size),
             nn.Tanh(),
         )
         self.var = nn.Sequential(
-            nn.Linear(HID_SIZE, act_size),
+            nn.Linear(hidden_size, act_size),
             nn.Softplus(),
         )
-        self.value = nn.Linear(HID_SIZE, 1)
+        self.value = nn.Linear(hidden_size, 1)
+
+        print("MODELS: {} {} {} {}".format(self.base, self.mu, self.var, self.value))
 
     def forward(self, x):
         base_out = self.base(x)

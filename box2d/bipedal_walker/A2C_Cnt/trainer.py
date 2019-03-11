@@ -13,7 +13,7 @@ from A2C_Cnt.utils import mkdir
 
 class A2C_Cnt_Trainer():
 
-    def __init__(self, env_name, config, random_seed=42, lr_base=0.001, lr_decay=0.00005,
+    def __init__(self, env_name, hidden_size=256, random_seed=42, lr_base=0.001, lr_decay=0.00005,
                  batch_size=32, max_episodes=10000, max_timesteps=10000, entropy_beta=1e-4, gamma=0.99, reward_steps=2,
                  log_interval=5, threshold=None, test_iters=10000, lr_minimum=1e-10,
                  log_dir='./log/'):
@@ -34,10 +34,7 @@ class A2C_Cnt_Trainer():
         else:
             self.threshold = self.env.spec.reward_threshold
 
-        self.config = config
-        #self.actor_config[0]['dim'][0] = self.state_dim
-        #self.actor_config[-1]['dim'][1] = self.action_dim
-        #self.critic_config[0]['dim'][0] = self.state_dim + self.action_dim
+        self.hidden_size = hidden_size
 
         self.random_seed = random_seed
         self.lr_base = lr_base
@@ -59,7 +56,7 @@ class A2C_Cnt_Trainer():
         self.directory = mkdir(prdir, self.algorithm_name)
         self.filename = "{}_{}_{}".format(self.algorithm_name, self.env_name, self.random_seed)
 
-        self.policy = A2C_Cnt(self.state_dim, self.action_dim, self.entropy_beta, self.gamma, self.reward_steps)
+        self.policy = A2C_Cnt(self.state_dim, self.action_dim, self.hidden_size, self.entropy_beta, self.gamma, self.reward_steps)
         self.exp_source = ptan.experience.ExperienceSourceFirstLast(self.env, self.policy.agent, self.gamma, steps_count=self.reward_steps)
 
         self.reward_history = []

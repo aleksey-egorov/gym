@@ -29,13 +29,13 @@ class A2C_Agent(ptan.agent.BaseAgent):
 
 class A2C_Cnt():
 
-    def __init__(self, state_dim, action_dim, entropy_beta, gamma, reward_steps):
+    def __init__(self, state_dim, action_dim, hidden_size, entropy_beta, gamma, reward_steps):
         super(A2C_Cnt, self).__init__()
 
         self.entropy_beta = entropy_beta
         self.gamma = gamma
         self.reward_steps = reward_steps
-        self.model = A2C_Model(state_dim, action_dim).to(device)
+        self.model = A2C_Model(state_dim, action_dim, hidden_size).to(device)
         self.agent = A2C_Agent(self.model, device)
 
 
