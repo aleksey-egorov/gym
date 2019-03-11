@@ -2,12 +2,12 @@ import torch
 import torch.nn.functional as F
 import torch.optim as optim
 
-from TD3.models import Actor, Critic
+from TD3_PER.models import Actor, Critic
 
 
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
-class TD3:
+class TD3_PER:
     def __init__(self, actor_config, critic_config, action_low, action_high):
 
         self.action_low = action_low[0]
