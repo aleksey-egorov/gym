@@ -5,6 +5,7 @@ import ptan
 import torch
 import numpy as np
 from tensorboardX import SummaryWriter
+from PIL import Image
 
 from A2C_Cnt.a2c_cnt import A2C_Cnt
 from A2C_Cnt.utils import mkdir
@@ -51,6 +52,7 @@ class A2C_Cnt_Trainer():
 
         self.batch_size = batch_size
         self.log_interval = log_interval
+        self.videos_dir = mkdir('.', 'videos')
 
         prdir = mkdir('.', 'preTrained')
         self.directory = mkdir(prdir, self.algorithm_name)
@@ -84,6 +86,8 @@ class A2C_Cnt_Trainer():
 
         batch = []
         best_reward = None
+        avg_reward = 0.0
+        episode = 0
         with ptan.common.utils.RewardTracker(self.writer) as tracker:
             with ptan.common.utils.TBMeanTracker(self.writer, batch_size=10) as tb_tracker:
 
@@ -93,6 +97,9 @@ class A2C_Cnt_Trainer():
                         rewards, steps = zip(*rewards_steps)
                         tb_tracker.track("episode_steps", steps[0], step_idx)
                         tracker.reward(rewards[0], step_idx)
+                        self.reward_history.append(rewards[0])
+                        avg_reward = np.mean(self.reward_history[-100:])
+                        episode += 1
 
                     if step_idx % self.test_iters == 0:
                         ts = time.time()
@@ -124,50 +131,50 @@ class A2C_Cnt_Trainer():
                     tb_tracker.track("loss_value", loss_value_v, step_idx)
                     tb_tracker.track("loss_total", loss_v, step_idx)
 
-
-                    '''
-                    # Print avg reward every log interval:
-                    if episode % self.log_interval == 0:
-                        self.policy.save(self.directory, self.filename)
-                        print(
-                            "Ep:{:4d}   Rew:{:5.2f}  Avg Rew:{:5.2f}  LR:{:8.8f}  Bf:{:2.0f} Beta:{:0.4f}  EN:{:0.4f}  Loss: {:5.3f} {:5.3f} {:5.3f}".format(
-                                episode, ep_reward, avg_reward, learning_rate, self.replay_buffer.get_fill(), beta,
-                                exploration_noise, avg_actor_loss, avg_Q1_loss, avg_Q2_loss))
+                    if len(self.reward_history) > 100:
+                        self.reward_history.pop(0)
 
                     # if avg reward > threshold then save and stop traning:
-                    
                     if avg_reward >= self.threshold and episode > 100:
-                        print(
-                            "Ep:{:4d}   Rew:{:5.2f}  Avg Rew:{:5.2f}  LR:{:8.8f}  Bf:{:2.0f} Beta:{:0.4f}  EN:{:0.4f}  Loss: {:5.3f} {:5.3f} {:5.3f}".format(
-                                episode, ep_reward, avg_reward, learning_rate, self.replay_buffer.get_fill(), beta,
-                                exploration_noise, avg_actor_loss, avg_Q1_loss, avg_Q2_loss))
                         print("########## Solved! ###########")
                         name = self.filename + '_solved'
                         self.policy.save(self.directory, name)
-                        
                         training_time = time.time() - start_time
                         print("Training time: {:6.2f} sec".format(training_time))
-                        break'''
+                        break
 
-    def test(self, episodes=3, render=True, save_gif=True):
+    def test(self, episodes=3, save_gif=True):
 
         gifdir = mkdir('.', 'gif')
         algdir = mkdir(gifdir, self.algorithm_name)
 
+        self.env = gym.wrappers.Monitor(self.env, self.videos_dir)
+
+        # loading models
+        self.policy.load(self.directory, self.filename)
+
         for episode in range(1, episodes + 1):
+
+            obs = self.env.reset()
             ep_reward = 0.0
-            state = self.env.reset()
+            total_steps = 0
+            net = self.policy.model
             epdir = mkdir(algdir, str(episode))
 
             for t in range(self.max_timesteps):
-                action = self.policy.select_action(state)
-                state, reward, done, _ = self.env.step(action)
+                obs_v = torch.FloatTensor([obs])
+                mu_v, var_v, val_v = net(obs_v)
+                action = mu_v.squeeze(dim=0).data.numpy()
+                action = np.clip(action, -1, 1)
+                obs, reward, done, _ = self.env.step(action)
                 ep_reward += reward
+                total_steps += 1
 
                 if save_gif:
                     img = self.env.render(mode='rgb_array')
                     img = Image.fromarray(img)
                     img.save('{}/{}.jpg'.format(epdir, t))
+
                 if done:
                     break
 
