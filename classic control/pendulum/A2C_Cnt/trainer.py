@@ -89,7 +89,7 @@ class A2C_Cnt_Trainer():
         avg_reward = 0.0
         episode = 0
         with ptan.common.utils.RewardTracker(self.writer) as tracker:
-            with ptan.common.utils.TBMeanTracker(self.writer, batch_size=self.batch_size) as tb_tracker:
+            with ptan.common.utils.TBMeanTracker(self.writer, batch_size=100) as tb_tracker:
 
                 for step_idx, exp in enumerate(self.exp_source):
                     rewards_steps = self.exp_source.pop_rewards_steps()
@@ -100,6 +100,7 @@ class A2C_Cnt_Trainer():
                         self.reward_history.append(rewards[0])
                         avg_reward = np.mean(self.reward_history[-100:])
                         episode += 1
+                        #print ("Ep: {} Avg reward: {}".format(episode, avg_reward))
 
                     if step_idx % self.test_iters == 0:
                         ts = time.time()

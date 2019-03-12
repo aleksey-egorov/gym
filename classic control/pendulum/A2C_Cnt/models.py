@@ -9,6 +9,8 @@ class A2C_Model(nn.Module):
         self.base = nn.Sequential(
             nn.Linear(obs_size, hidden_size),
             nn.ReLU(),
+            nn.Linear(hidden_size, hidden_size),
+            nn.ReLU(),
         )
         self.mu = nn.Sequential(
             nn.Linear(hidden_size, act_size),
