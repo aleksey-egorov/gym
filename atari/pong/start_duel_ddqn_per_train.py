@@ -5,14 +5,14 @@ env_name = "PongNoFrameskip-v4"
 lr_base = 0.0001
 lr_decay = 0.0001
 epsilon_base = 1.0
-epsilon_decay = 0.002
+epsilon_decay = 0.03
 
 random_seed = 43
 gamma = 0.99                # discount for future rewards
 batch_size = 32       # num of transitions sampled from replay buffer
 alpha=0.9
 beta_base=0.3
-beta_multiplier=0.0005
+beta_multiplier=0.001
 
 max_episodes = 10000         # max num of episodes
 max_timesteps = 3000        # max timesteps in one episode

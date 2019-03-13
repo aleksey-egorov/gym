@@ -136,7 +136,7 @@ class Dueling_DDQN_PER_Conv_Trainer():
 
 
             # if avg reward > threshold then save and stop traning:
-            if avg_reward >= self.threshold and episode > 100:
+            if avg_reward >= self.threshold:
                 print(
                     "Ep:{:5d}  Rew:{:8.2f}  Avg Rew:{:8.2f}  LR:{:8.8f}  Bf:{:2.0f}  EPS:{:0.4f}  Loss: {:5.3f}".format(
                         episode, ep_reward, avg_reward, learning_rate, self.replay_buffer.get_fill(),
