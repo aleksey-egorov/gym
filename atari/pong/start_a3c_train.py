@@ -36,7 +36,7 @@ config = [conv_config, fc_config]
 agent = A3C_Conv_Trainer(env_name,  random_seed=random_seed, lr_base=lr_base, lr_decay=lr_decay,
                    gamma=gamma, batch_size=batch_size,
                    max_episodes=max_episodes, max_timesteps=max_timesteps,
-                   log_interval=log_interval, entropy_beta=entropy_beta, bellman_steps=bellman_steps, num_envs=num_envs,
+                   log_interval=log_interval, entropy_beta=entropy_beta, bellman_steps=bellman_steps, total_envs=total_envs,
                    clip_grad=clip_grad, threshold=threshold
                    )
 agent.train()
