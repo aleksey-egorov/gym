@@ -66,6 +66,15 @@ class A2C_Conv():
 
         return adv_v, value_v, q_vals_v, entropy_loss_v, loss_policy_v, loss_value_v, loss_v, grads
 
+    def test(self, batch):
+        states_v, actions_t, q_vals_v = unpack_batch(batch, self.model,
+                                                         last_val_gamma=self.gamma ** self.bellman_steps,
+                                                         device=device)
+        batch.clear()
+
+        logits_v, value_v = self.model(states_v)
+        return logits_v, value_v
+
     def save(self, directory, name):
         torch.save(self.model.state_dict(), '%s/%s_model.pth' % (directory, name))
 

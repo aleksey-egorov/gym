@@ -8,7 +8,7 @@ from tensorboardX import SummaryWriter
 from PIL import Image
 
 from A2C_Conv.a2c import A2C_Conv
-from A2C_Conv.utils import mkdir
+from A2C_Conv.utils import mkdir, RewardTracker
 
 
 
@@ -76,9 +76,10 @@ class A2C_Conv_Trainer():
     def train(self):
 
         start_time = time.time()
+        print("Envs number: {}".format(self.num_envs))
         print("Action_space: {}".format(self.env.action_space))
         print("Obs_space: {}".format(self.env.observation_space))
-        print("Threshold: {}".format(self.threshold))
+        print("Threshold: {} \n".format(self.threshold))
 
         # loading models
         self.policy.load(self.directory, self.filename)
@@ -89,8 +90,8 @@ class A2C_Conv_Trainer():
         batch = []
         avg_reward = 0.0
         episode = 0
-        with ptan.common.utils.RewardTracker(self.writer) as tracker:
-            with ptan.common.utils.TBMeanTracker(self.writer, batch_size=10) as tb_tracker:
+        with RewardTracker(self.writer, stop_reward=self.threshold) as tracker:
+            with ptan.common.utils.TBMeanTracker(self.writer, batch_size=100) as tb_tracker:
 
                 for step_idx, exp in enumerate(self.exp_source):
 
@@ -128,7 +129,7 @@ class A2C_Conv_Trainer():
                         self.reward_history.pop(0)
 
                     # if avg reward > threshold then save and stop traning:
-                    if avg_reward >= self.threshold and episode > 100:
+                    if avg_reward >= self.threshold:
                         print("########## Solved! ###########")
                         name = self.filename + '_solved'
                         self.policy.save(self.directory, name)
@@ -136,44 +137,57 @@ class A2C_Conv_Trainer():
                         print("Training time: {:6.2f} sec".format(training_time))
                         break
 
+
     def test(self, episodes=3, save_gif=True):
 
         gifdir = mkdir('.', 'gif')
         algdir = mkdir(gifdir, self.algorithm_name)
 
-        self.env = gym.wrappers.Monitor(self.env, self.videos_dir)
+        #self.env = gym.wrappers.Monitor(self.env, self.videos_dir)
 
         # loading models
         self.policy.load(self.directory, self.filename)
+        self.exp_source = ptan.experience.ExperienceSourceFirstLast(self.envs, self.policy.agent, gamma=self.gamma,
+                                                                    steps_count=self.bellman_steps)
 
-        for episode in range(1, episodes + 1):
+        self.env.reset()
+        episode = 0
+        batch = []
+        t = 0
+        finished = False
+        epdir = mkdir(algdir, str(episode))
 
-            obs = self.env.reset()
-            ep_reward = 0.0
-            t = 0
-            epdir = mkdir(algdir, str(episode))
-
-            with ptan.common.utils.RewardTracker(self.writer) as tracker:
+        with RewardTracker(self.writer, stop_reward=self.threshold) as tracker:
+            with ptan.common.utils.TBMeanTracker(self.writer, batch_size=10) as tb_tracker:
 
                 for step_idx, exp in enumerate(self.exp_source):
+
+                    batch.append(exp)
 
                     # handle new rewards
                     new_rewards = self.exp_source.pop_total_rewards()
                     if new_rewards:
                         finished, save_checkpoint = tracker.reward(new_rewards[0], step_idx)
-
-                        if save_gif:
-                            img = self.env.render(mode='rgb_array')
-                            img = Image.fromarray(img)
-                            img.save('{}/{}.jpg'.format(epdir, t))
-
                         if finished:
-                            t = 0
+                            self.reward_history.append(new_rewards[0])
+                            # avg_reward = np.mean(self.reward_history[-100:])
+                            episode += 1
                             break
 
+                    if save_gif:
+                        img = self.env.render(mode='rgb_array')
+                        img = Image.fromarray(img)
+                        img.save('{}/{}.jpg'.format(epdir, t))
+
+                    if finished:
+                        ep_reward = new_rewards[0]
+                        episode += 1
+                        epdir = mkdir(algdir, str(episode))
+                        t = 0
+                        print('Test episode: {}\tReward: {:4.2f}'.format(episode, ep_reward))
+
                     t += 1
+                    if episode == episodes:
+                        break
 
-
-
-            print('Test episode: {}\tReward: {:4.2f}'.format(episode, ep_reward))
-            self.env.close()
+        self.env.close()
