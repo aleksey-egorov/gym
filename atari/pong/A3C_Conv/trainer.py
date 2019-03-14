@@ -15,7 +15,23 @@ from A3C_Conv.utils import mkdir, RewardTracker
 
 TotalReward = collections.namedtuple('TotalReward', field_names='reward')
 
-class A2C_Conv_Trainer():
+
+
+def data_func(envs, net, gamma, bellman_steps, device, train_queue):
+    # each process runs multiple instances of the environment, round-robin
+    agent = ptan.agent.PolicyAgent(lambda x: net(x)[0], device=device, apply_softmax=True)
+    exp_source = ptan.experience.ExperienceSourceFirstLast(envs, agent, gamma=gamma,
+                                                           steps_count=bellman_steps)
+
+    for exp in exp_source:
+        new_rewards = exp_source.pop_total_rewards()
+        if new_rewards:
+            train_queue.put(TotalReward(reward=np.mean(new_rewards)))
+        train_queue.put(exp)
+
+
+
+class A3C_Conv_Trainer():
 
     def __init__(self, env_name, total_envs=64, hidden_size=256, random_seed=42, lr_base=0.001, lr_decay=0.00005,
                  batch_size=32, max_episodes=10000, max_timesteps=10000,
@@ -26,12 +42,13 @@ class A2C_Conv_Trainer():
         self.algorithm_name = 'a3c_conv'
         self.env_name = env_name
         self.total_envs = total_envs
-        self.make_env = lambda: ptan.common.wrappers.wrap_dqn(gym.make(self.env_name))
-        self.envs = [self.make_env() for _ in range(self.total_envs)]
-        self.env = self.envs[0]
-
         self.processes_count = mp.cpu_count()
         self.envs_per_process = math.ceil(self.total_envs / self.processes_count)
+
+        self.make_env = lambda: ptan.common.wrappers.wrap_dqn(gym.make(self.env_name))
+        self.envs = [self.make_env() for _ in range(self.envs_per_process)]
+        self.env = self.envs[0]
+        self.device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
         self.log_dir = os.path.join(log_dir, self.algorithm_name)
         self.writer = SummaryWriter(log_dir=self.log_dir, comment=self.algorithm_name + "_" + self.env_name)
@@ -79,17 +96,6 @@ class A2C_Conv_Trainer():
             torch.manual_seed(self.random_seed)
             np.random.seed(self.random_seed)
 
-    def data_func(self, net, device, train_queue):
-        # each process runs multiple instances of the environment, round-robin
-        envs = [self.make_env() for _ in range(self.envs_per_process)]
-        agent = ptan.agent.PolicyAgent(lambda x: net(x)[0], device=device, apply_softmax=True)
-        exp_source = ptan.experience.ExperienceSourceFirstLast(envs, agent, gamma=self.gamma, steps_count=self.bellman_steps)
-
-        for exp in exp_source:
-            new_rewards = exp_source.pop_total_rewards()
-            if new_rewards:
-                train_queue.put(TotalReward(reward=np.mean(new_rewards)))
-            train_queue.put(exp)
 
     def train(self):
 
@@ -110,9 +116,10 @@ class A2C_Conv_Trainer():
         train_queue = mp.Queue(maxsize=self.processes_count)
         data_proc_list = []
 
+
         # Spawn processes to run data_func
         for _ in range(self.processes_count):
-            data_proc = mp.Process(target=self.data_func, args=(self.policy.model, device, train_queue))
+            data_proc = mp.Process(target=data_func, args=(self.envs, self.policy.model, self.gamma, self.bellman_steps, self.device, train_queue))
             data_proc.start()
             data_proc_list.append(data_proc)
 
