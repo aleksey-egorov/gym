@@ -42,7 +42,7 @@ class A3C_Conv_Trainer():
         self.algorithm_name = 'a3c_conv'
         self.env_name = env_name
         self.total_envs = total_envs
-        self.processes_count = mp.cpu_count()
+        self.processes_count = 3 #mp.cpu_count()
         self.envs_per_process = math.ceil(self.total_envs / self.processes_count)
 
         self.make_env = lambda: ptan.common.wrappers.wrap_dqn(gym.make(self.env_name))
@@ -102,6 +102,7 @@ class A3C_Conv_Trainer():
 
         start_time = time.time()
         print("Envs number: {}".format(self.total_envs))
+        print("Processes: {}".format(self.processes_count))
         print("Envs per process: {}".format(self.envs_per_process))
         print("Action_space: {}".format(self.env.action_space))
         print("Obs_space: {}".format(self.env.observation_space))
@@ -113,10 +114,6 @@ class A3C_Conv_Trainer():
 
         print("Training started ... \n")
         #mp.set_start_method('spawn')
-        try:
-            mp.set_start_method('spawn')
-        except RuntimeError:
-            pass
 
         train_queue = mp.Queue(maxsize=self.processes_count)
         data_proc_list = []
