@@ -5,6 +5,7 @@ import torch
 import numpy as np
 from tensorboardX import SummaryWriter
 from PIL import Image
+from gym import wrappers
 
 from PPO.ppo import PPO
 from PPO.utils import mkdir
@@ -27,7 +28,6 @@ class PPO_Trainer():
         self.envs = SubprocVecEnv(self.envs)
         self.env = gym.make(self.env_name)
 
-        self.env = gym.make(env_name)
         self.test_env = gym.make(env_name)
         self.log_dir = os.path.join(log_dir, self.algorithm_name)
         self.writer = SummaryWriter(log_dir=self.log_dir, comment=self.algorithm_name + "_" + self.env_name)
@@ -57,6 +57,7 @@ class PPO_Trainer():
         self.ppo_epochs = ppo_epochs
         self.test_epochs = test_epochs
         self.num_tests = num_tests
+        self.max_timesteps = 1000000
 
         self.batch_size = batch_size
         self.log_interval = log_interval
@@ -179,14 +180,18 @@ class PPO_Trainer():
         gifdir = mkdir('.', 'gif')
         algdir = mkdir(gifdir, self.algorithm_name)
 
-        self.env = gym.wrappers.Monitor(self.env, self.videos_dir)
+        env = gym.make(self.env_name)
+        videos_dir = mkdir('.', 'videos')
+        monitor_dir = mkdir(videos_dir, self.algorithm_name)
+        should_record = lambda i: True
+        env = wrappers.Monitor(env, monitor_dir, video_callable=should_record, force=True)
 
         # loading models
         self.policy.load(self.directory, self.filename)
 
         for episode in range(1, episodes + 1):
 
-            obs = self.env.reset()
+            obs = env.reset()
             ep_reward = 0.0
             total_steps = 0
             net = self.policy.model
@@ -197,12 +202,12 @@ class PPO_Trainer():
                 mu_v, var_v, val_v = net(obs_v)
                 action = mu_v.squeeze(dim=0).data.numpy()
                 action = np.clip(action, -1, 1)
-                obs, reward, done, _ = self.env.step(action)
+                obs, reward, done, _ = env.step(action)
                 ep_reward += reward
                 total_steps += 1
 
                 if save_gif:
-                    img = self.env.render(mode='rgb_array')
+                    img = env.render(mode='rgb_array')
                     img = Image.fromarray(img)
                     img.save('{}/{}.jpg'.format(epdir, t))
 
