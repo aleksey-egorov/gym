@@ -1,5 +1,6 @@
 import torch
 import torch.nn as nn
+import torch.nn.functional as F
 import numpy as np
 from torch.distributions import Categorical
 
@@ -21,7 +22,8 @@ class ActorCritic(nn.Module):
         self.actor = nn.Sequential(
             nn.Linear(conv_out_size, 512),
             nn.ReLU(),
-            nn.Linear(512, num_outputs)
+            nn.Linear(512, num_outputs),
+            nn.Softmax(),
         ).to(device)
 
         self.critic = nn.Sequential(
@@ -46,9 +48,11 @@ class ActorCritic(nn.Module):
         conv_out = self.conv(x).view(x.size()[0], -1)
         value = self.critic(conv_out)
         mu = self.actor(conv_out)
+
+        mu_prob_v = F.log_softmax(mu, dim=1)
         #std = self.log_std.exp().expand_as(mu)
-        print ("MU: {}".format(mu.shape))
-        dist = Categorical(mu)
+        #print ("MU: {}".format(mu))
+        dist = Categorical(mu_prob_v)
         return dist, value
 
 

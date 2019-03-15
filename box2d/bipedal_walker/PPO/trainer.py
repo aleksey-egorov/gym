@@ -192,18 +192,19 @@ class PPO_Trainer():
 
         for episode in range(1, episodes + 1):
 
-            obs = env.reset()
+            state = env.reset()
             ep_reward = 0.0
             total_steps = 0
-            net = self.policy.model
             epdir = mkdir(algdir, str(episode))
 
             for t in range(self.max_timesteps):
-                obs_v = torch.FloatTensor([obs])
-                mu_v, var_v, val_v = net(obs_v)
-                action = mu_v.squeeze(dim=0).data.numpy()
-                action = np.clip(action, -1, 1)
-                obs, reward, done, _ = env.step(action)
+                state = torch.FloatTensor(state).to(device)
+                dist, value = self.policy.model(state)
+                action = dist.sample()
+
+                # each state, reward, done is a list of results from each parallel environment
+                next_state, reward, done, _ = env.step(action.cpu().numpy())
+                state = next_state
                 ep_reward += reward
                 total_steps += 1
 
