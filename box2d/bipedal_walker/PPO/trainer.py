@@ -24,8 +24,8 @@ class PPO_Trainer():
         self.algorithm_name = 'ppo'
         self.env_name = env_name
         self.num_envs = num_envs
-        self.envs = [self.make_env() for i in range(self.num_envs)]
-        self.envs = SubprocVecEnv(self.envs)
+        self.envs_unwrapped = [self.make_env() for i in range(self.num_envs)]
+        self.envs = SubprocVecEnv(self.envs_unwrapped)
         self.env = gym.make(self.env_name)
 
         self.test_env = gym.make(env_name)
@@ -121,8 +121,8 @@ class PPO_Trainer():
             for _ in range(self.ppo_steps):
                 state = torch.FloatTensor(state).to(device)
                 dist, value = self.policy.model(state)
-
                 action = dist.sample()
+
                 # each state, reward, done is a list of results from each parallel environment
                 next_state, reward, done, _ = self.envs.step(action.cpu().numpy())
                 log_prob = dist.log_prob(action)
@@ -137,6 +137,7 @@ class PPO_Trainer():
 
                 state = next_state
                 frame_idx += 1
+
 
             next_state = torch.FloatTensor(next_state).to(device)
             _, next_value = self.policy.model(next_state)
@@ -161,6 +162,9 @@ class PPO_Trainer():
             self.writer.add_scalar("loss_total", sum_loss_total_m, frame_idx)
 
             train_epoch += 1
+            self.policy.save(self.directory, self.filename)
+
+
 
             if train_epoch % self.test_epochs == 0:
                 test_reward = np.mean([self.policy.test_env(self.env, device) for _ in range(self.num_tests)])
@@ -174,42 +178,49 @@ class PPO_Trainer():
                         self.policy.save(self.directory, fname)
                     best_reward = test_reward
                 if test_reward > self.threshold:
+                    print("########## Solved! ###########")
+                    name = self.filename + '_solved'
+                    self.policy.save(self.directory, name)
+                    training_time = time.time() - start_time
+                    print("Training time: {:6.2f} sec".format(training_time))
                     early_stop = True
+
 
     def test(self, episodes=3, save_gif=True):
 
         gifdir = mkdir('.', 'gif')
         algdir = mkdir(gifdir, self.algorithm_name)
 
-        env = gym.make(self.env_name)
-        videos_dir = mkdir('.', 'videos')
-        monitor_dir = mkdir(videos_dir, self.algorithm_name)
-        should_record = lambda i: True
-        env = wrappers.Monitor(env, monitor_dir, video_callable=should_record, force=True)
+        #videos_dir = mkdir('.', 'videos')
+        #monitor_dir = mkdir(videos_dir, self.algorithm_name)
+        #should_record = lambda i: True
+        #env = wrappers.Monitor(env, monitor_dir, video_callable=should_record, force=True)
 
         # loading models
         self.policy.load(self.directory, self.filename)
+        states_pr = torch.zeros((self.num_envs, self.state_dim))
+
 
         for episode in range(1, episodes + 1):
 
-            state = env.reset()
+            state = self.env.reset()
             ep_reward = 0.0
             total_steps = 0
             epdir = mkdir(algdir, str(episode))
 
             for t in range(self.max_timesteps):
-                state = torch.FloatTensor(state).to(device)
+                state = torch.FloatTensor(state).reshape(1, -1).expand_as(states_pr).to(device)
                 dist, value = self.policy.model(state)
                 action = dist.sample()
 
                 # each state, reward, done is a list of results from each parallel environment
-                next_state, reward, done, _ = env.step(action.cpu().numpy())
+                next_state, reward, done, _ = self.env.step(action[0].cpu().numpy())
                 state = next_state
                 ep_reward += reward
                 total_steps += 1
 
                 if save_gif:
-                    img = env.render(mode='rgb_array')
+                    img = self.env.render(mode='rgb_array')
                     img = Image.fromarray(img)
                     img.save('{}/{}.jpg'.format(epdir, t))
 
