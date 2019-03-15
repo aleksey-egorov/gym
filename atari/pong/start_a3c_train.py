@@ -20,7 +20,7 @@ log_interval = 10           # print avg reward after interval
 threshold = 19.5
 
 
-
+'''
 conv_config = [
     {'dim': [None, 32], 'kernel': 8, 'stride': 4, 'batch_norm': False, 'activation': 'relu'},
     {'dim': [32, 64], 'kernel': 4, 'stride': 2, 'batch_norm': False, 'activation': 'relu'},
@@ -31,7 +31,7 @@ fc_config = [
         {'dim': [512, None], 'dropout': False, 'activation': False},
 ]
 config = [conv_config, fc_config]
-
+'''
 
 agent = A3C_Conv_Trainer(env_name,  random_seed=random_seed, lr_base=lr_base, lr_decay=lr_decay,
                    gamma=gamma, batch_size=batch_size,
