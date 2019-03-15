@@ -4,15 +4,13 @@ from PG_Conv.trainer import PG_Conv_Trainer
 env_name = "PongNoFrameskip-v4"
 lr_base = 0.0001
 lr_decay = 0.0001
-epsilon_base = 1.0
-epsilon_decay = 0.002
 
 random_seed = 43
 gamma = 0.99                # discount for future rewards
 batch_size = 32       # num of transitions sampled from replay buffer
 
-entropy_beta = 0.05
-bellman_steps = 250
+entropy_beta = 0.001
+bellman_steps = 50
 baseline_steps = 50000
 
 max_episodes = 10000         # max num of episodes
