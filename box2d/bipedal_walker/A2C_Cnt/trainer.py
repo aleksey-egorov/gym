@@ -148,8 +148,6 @@ class A2C_Cnt_Trainer():
         gifdir = mkdir('.', 'gif')
         algdir = mkdir(gifdir, self.algorithm_name)
 
-        self.env = gym.wrappers.Monitor(self.env, self.videos_dir)
-
         # loading models
         self.policy.load(self.directory, self.filename)
 

@@ -7,15 +7,16 @@ from tensorboardX import SummaryWriter
 from PIL import Image
 from gym import wrappers
 
-from PPO.ppo import PPO
-from PPO.utils import mkdir
-from PPO.multiprocessing_env import SubprocVecEnv
+from PPO_Conv import wrappers
+from PPO_Conv.ppo import PPO_Conv
+from PPO_Conv.utils import mkdir
+from PPO_Conv.multiprocessing_env import SubprocVecEnv
 
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
-class PPO_Trainer():
+class PPO_Conv_Trainer():
 
-    def __init__(self, env_name, hidden_size=256, num_envs=8, random_seed=42, lr_base=0.0001, lr_decay=0.0001,
+    def __init__(self, env_name, hidden_size=256, num_envs=4, random_seed=42, lr_base=0.0001, lr_decay=0.0001,
                  lr_minimum=1e-7, gamma=0.99, gae_lambda=0.95, ppo_epsilon=0.2, critic_discount=0.5,
                  batch_size=32, entropy_beta=0.001, ppo_steps=256, ppo_epochs=10,
                  test_epochs=10, num_tests=10, log_interval=10, threshold=None,
@@ -24,18 +25,16 @@ class PPO_Trainer():
         self.algorithm_name = 'ppo'
         self.env_name = env_name
         self.num_envs = num_envs
-        self.envs = [self.make_env() for i in range(self.num_envs)]
+        self.envs = [self.make_env() for _ in range(self.num_envs)]
         self.envs = SubprocVecEnv(self.envs)
-        self.env = gym.make(self.env_name)
+        self.env = wrappers.make_env(self.env_name)
 
         self.test_env = gym.make(env_name)
         self.log_dir = os.path.join(log_dir, self.algorithm_name)
         self.writer = SummaryWriter(log_dir=self.log_dir, comment=self.algorithm_name + "_" + self.env_name)
 
-        self.state_dim = self.env.observation_space.shape[0]
-        self.action_dim = self.env.action_space.shape[0]
-        self.action_low = self.env.action_space.low
-        self.action_high = self.env.action_space.high
+        self.state_dim = self.env.observation_space.shape
+        self.action_dim = self.env.action_space.n
         if not threshold == None:
             self.threshold = threshold
         else:
@@ -67,7 +66,7 @@ class PPO_Trainer():
         self.directory = mkdir(prdir, self.algorithm_name)
         self.filename = "{}_{}_{}".format(self.algorithm_name, self.env_name, self.random_seed)
 
-        self.policy = PPO(self.state_dim, self.action_dim, self.hidden_size, self.entropy_beta, self.gamma,
+        self.policy = PPO_Conv(self.state_dim, self.action_dim, self.entropy_beta, self.gamma,
                           self.gae_lambda, self.batch_size, self.ppo_epsilon, self.ppo_epochs, self.critic_discount)
 
         self.reward_history = []
@@ -82,7 +81,7 @@ class PPO_Trainer():
     def make_env(self):
         # returns a function which creates a single environment
         def _thunk():
-            env = gym.make(self.env_name)
+            env = wrappers.make_env(self.env_name)
             return env
 
         return _thunk
@@ -94,7 +93,6 @@ class PPO_Trainer():
         print("Action_space: {}".format(self.env.action_space))
         print("Obs_space: {}".format(self.env.observation_space))
         print("Threshold: {}".format(self.threshold))
-        print("action_low: {} action_high: {} \n".format(self.action_low, self.action_high))
 
         # loading models
         self.policy.load(self.directory, self.filename)
@@ -121,19 +119,18 @@ class PPO_Trainer():
             for _ in range(self.ppo_steps):
                 state = torch.FloatTensor(state).to(device)
                 dist, value = self.policy.model(state)
-
                 action = dist.sample()
+
                 # each state, reward, done is a list of results from each parallel environment
                 next_state, reward, done, _ = self.envs.step(action.cpu().numpy())
                 log_prob = dist.log_prob(action)
 
-                log_probs.append(log_prob)
+                log_probs.append(log_prob.reshape(-1,1))
                 values.append(value)
                 rewards.append(torch.FloatTensor(reward).unsqueeze(1).to(device))
                 masks.append(torch.FloatTensor(1 - done).unsqueeze(1).to(device))
-
                 states.append(state)
-                actions.append(action)
+                actions.append(action.reshape(-1,1))
 
                 state = next_state
                 frame_idx += 1
@@ -192,19 +189,18 @@ class PPO_Trainer():
 
         for episode in range(1, episodes + 1):
 
-            state = env.reset()
+            obs = env.reset()
             ep_reward = 0.0
             total_steps = 0
+            net = self.policy.model
             epdir = mkdir(algdir, str(episode))
 
             for t in range(self.max_timesteps):
-                state = torch.FloatTensor(state).to(device)
-                dist, value = self.policy.model(state)
-                action = dist.sample()
-
-                # each state, reward, done is a list of results from each parallel environment
-                next_state, reward, done, _ = env.step(action.cpu().numpy())
-                state = next_state
+                obs_v = torch.FloatTensor([obs])
+                mu_v, var_v, val_v = net(obs_v)
+                action = mu_v.squeeze(dim=0).data.numpy()
+                action = np.clip(action, -1, 1)
+                obs, reward, done, _ = env.step(action)
                 ep_reward += reward
                 total_steps += 1
 

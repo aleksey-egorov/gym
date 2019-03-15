@@ -1,6 +1,6 @@
-from PPO.trainer import PPO_Trainer
+from PPO_Conv.trainer import PPO_Conv_Trainer
 
-env_name = 'BipedalWalker-v2'
+env_name = "PongNoFrameskip-v4"
 num_envs = 16
 lr_base = 0.0001
 lr_decay = 0.0001
@@ -18,7 +18,8 @@ num_tests = 10
 log_interval = 10
 
 
-agent = PPO_Trainer(env_name, num_envs=num_envs, random_seed=random_seed, lr_base=lr_base, lr_decay=lr_decay,
+
+agent = PPO_Conv_Trainer(env_name, num_envs=num_envs, random_seed=random_seed, lr_base=lr_base, lr_decay=lr_decay,
                    gamma=gamma, gae_lambda=gae_lambda, ppo_epsilon=ppo_epsilon, critic_discount=critic_discount,
                    batch_size=batch_size, entropy_beta=entropy_beta, ppo_steps=ppo_steps, ppo_epochs=ppo_epochs,
                    test_epochs=test_epochs, num_tests=num_tests, log_interval=log_interval)
