@@ -9,7 +9,7 @@ random_seed = 43
 gamma = 0.99                # discount for future rewards
 batch_size = 32       # num of transitions sampled from replay buffer
 
-entropy_beta = 0.01
+entropy_beta = 0.001
 bellman_steps = 4
 num_envs = 50
 clip_grad = 0.1
@@ -20,7 +20,7 @@ log_interval = 10           # print avg reward after interval
 threshold = 19.5
 
 
-
+'''
 conv_config = [
     {'dim': [None, 32], 'kernel': 8, 'stride': 4, 'batch_norm': False, 'activation': 'relu'},
     {'dim': [32, 64], 'kernel': 4, 'stride': 2, 'batch_norm': False, 'activation': 'relu'},
@@ -31,12 +31,12 @@ fc_config = [
         {'dim': [512, None], 'dropout': False, 'activation': False},
 ]
 config = [conv_config, fc_config]
+'''
 
-
-agent = A2C_Conv_Trainer(env_name,  random_seed=random_seed, lr_base=lr_base, lr_decay=lr_decay,
+agent = A2C_Conv_Trainer(env_name, num_envs=num_envs, random_seed=random_seed, lr_base=lr_base, lr_decay=lr_decay,
                    gamma=gamma, batch_size=batch_size,
                    max_episodes=max_episodes, max_timesteps=max_timesteps,
-                   log_interval=log_interval, entropy_beta=entropy_beta, bellman_steps=bellman_steps, num_envs=num_envs,
+                   log_interval=log_interval, entropy_beta=entropy_beta, bellman_steps=bellman_steps,
                    clip_grad=clip_grad, threshold=threshold
                    )
 agent.train()

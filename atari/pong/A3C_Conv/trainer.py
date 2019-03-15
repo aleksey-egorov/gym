@@ -14,10 +14,10 @@ from A3C_Conv.a3c import A3C_Conv
 from A3C_Conv.utils import mkdir, RewardTracker
 
 TotalReward = collections.namedtuple('TotalReward', field_names='reward')
+device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
 
-
-def data_func(envs, net, gamma, bellman_steps, device, train_queue):
+def data_func(envs, net, gamma, bellman_steps, train_queue):
     # each process runs multiple instances of the environment, round-robin
     agent = ptan.agent.PolicyAgent(lambda x: net(x)[0], device=device, apply_softmax=True)
     exp_source = ptan.experience.ExperienceSourceFirstLast(envs, agent, gamma=gamma,
@@ -33,7 +33,7 @@ def data_func(envs, net, gamma, bellman_steps, device, train_queue):
 
 class A3C_Conv_Trainer():
 
-    def __init__(self, env_name, total_envs=64, hidden_size=256, random_seed=42, lr_base=0.001, lr_decay=0.00005,
+    def __init__(self, env_name, total_envs=4, hidden_size=256, random_seed=42, lr_base=0.001, lr_decay=0.00005,
                  batch_size=32, max_episodes=10000, max_timesteps=10000,
                  entropy_beta=1e-4, gamma=0.99, bellman_steps=4, clip_grad=0.1,
                  log_interval=5, threshold=None, test_iters=10000, lr_minimum=1e-10,
@@ -48,7 +48,8 @@ class A3C_Conv_Trainer():
         self.make_env = lambda: ptan.common.wrappers.wrap_dqn(gym.make(self.env_name))
         self.envs = [self.make_env() for _ in range(self.envs_per_process)]
         self.env = self.envs[0]
-        self.device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+
+        #self.device = torch.device("cpu")
 
         self.log_dir = os.path.join(log_dir, self.algorithm_name)
         self.writer = SummaryWriter(log_dir=self.log_dir, comment=self.algorithm_name + "_" + self.env_name)
@@ -111,7 +112,11 @@ class A3C_Conv_Trainer():
         self.policy.set_optimizers(lr=self.lr_base)
 
         print("Training started ... \n")
-        mp.set_start_method('spawn')
+        #mp.set_start_method('spawn')
+        try:
+            mp.set_start_method('spawn')
+        except RuntimeError:
+            pass
 
         train_queue = mp.Queue(maxsize=self.processes_count)
         data_proc_list = []
@@ -119,7 +124,7 @@ class A3C_Conv_Trainer():
 
         # Spawn processes to run data_func
         for _ in range(self.processes_count):
-            data_proc = mp.Process(target=data_func, args=(self.envs, self.policy.model, self.gamma, self.bellman_steps, self.device, train_queue))
+            data_proc = mp.Process(target=data_func, args=(self.envs, self.policy.model, self.gamma, self.bellman_steps, train_queue))
             data_proc.start()
             data_proc_list.append(data_proc)
 
