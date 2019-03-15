@@ -33,7 +33,7 @@ def data_func(envs, net, gamma, bellman_steps, train_queue):
 
 class A3C_Conv_Trainer():
 
-    def __init__(self, env_name, total_envs=64, hidden_size=256, random_seed=42, lr_base=0.001, lr_decay=0.00005,
+    def __init__(self, env_name, total_envs=4, hidden_size=256, random_seed=42, lr_base=0.001, lr_decay=0.00005,
                  batch_size=32, max_episodes=10000, max_timesteps=10000,
                  entropy_beta=1e-4, gamma=0.99, bellman_steps=4, clip_grad=0.1,
                  log_interval=5, threshold=None, test_iters=10000, lr_minimum=1e-10,
@@ -112,7 +112,11 @@ class A3C_Conv_Trainer():
         self.policy.set_optimizers(lr=self.lr_base)
 
         print("Training started ... \n")
-        mp.set_start_method('spawn')
+        #mp.set_start_method('spawn')
+        try:
+            mp.set_start_method('spawn')
+        except RuntimeError:
+            pass
 
         train_queue = mp.Queue(maxsize=self.processes_count)
         data_proc_list = []
