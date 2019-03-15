@@ -22,8 +22,7 @@ class ActorCritic(nn.Module):
         self.actor = nn.Sequential(
             nn.Linear(conv_out_size, 512),
             nn.ReLU(),
-            nn.Linear(512, num_outputs),
-            nn.Softmax(),
+            nn.Linear(512, num_outputs)
         ).to(device)
 
         self.critic = nn.Sequential(
@@ -48,10 +47,13 @@ class ActorCritic(nn.Module):
         conv_out = self.conv(x).view(x.size()[0], -1)
         value = self.critic(conv_out)
         mu = self.actor(conv_out)
-
         mu_prob_v = F.log_softmax(mu, dim=1)
+
+        #print ("MU: {}".format(mu_prob_v.shape))
+        #print ("MU: {}".format(mu_prob_v.shape))
+
         #std = self.log_std.exp().expand_as(mu)
-        #print ("MU: {}".format(mu))
+        #print ("MU: {}".format(mu.shape))
         dist = Categorical(mu_prob_v)
         return dist, value
 

@@ -119,19 +119,18 @@ class PPO_Conv_Trainer():
             for _ in range(self.ppo_steps):
                 state = torch.FloatTensor(state).to(device)
                 dist, value = self.policy.model(state)
-
                 action = dist.sample()
+
                 # each state, reward, done is a list of results from each parallel environment
                 next_state, reward, done, _ = self.envs.step(action.cpu().numpy())
                 log_prob = dist.log_prob(action)
 
-                log_probs.append(log_prob)
+                log_probs.append(log_prob.reshape(-1,1))
                 values.append(value)
                 rewards.append(torch.FloatTensor(reward).unsqueeze(1).to(device))
                 masks.append(torch.FloatTensor(1 - done).unsqueeze(1).to(device))
-
                 states.append(state)
-                actions.append(action)
+                actions.append(action.reshape(-1,1))
 
                 state = next_state
                 frame_idx += 1
