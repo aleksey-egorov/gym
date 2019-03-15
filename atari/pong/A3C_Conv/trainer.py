@@ -14,10 +14,10 @@ from A3C_Conv.a3c import A3C_Conv
 from A3C_Conv.utils import mkdir, RewardTracker
 
 TotalReward = collections.namedtuple('TotalReward', field_names='reward')
+device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
 
-
-def data_func(envs, net, gamma, bellman_steps, device, train_queue):
+def data_func(envs, net, gamma, bellman_steps, train_queue):
     # each process runs multiple instances of the environment, round-robin
     agent = ptan.agent.PolicyAgent(lambda x: net(x)[0], device=device, apply_softmax=True)
     exp_source = ptan.experience.ExperienceSourceFirstLast(envs, agent, gamma=gamma,
@@ -48,7 +48,8 @@ class A3C_Conv_Trainer():
         self.make_env = lambda: ptan.common.wrappers.wrap_dqn(gym.make(self.env_name))
         self.envs = [self.make_env() for _ in range(self.envs_per_process)]
         self.env = self.envs[0]
-        self.device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+
+        #self.device = torch.device("cpu")
 
         self.log_dir = os.path.join(log_dir, self.algorithm_name)
         self.writer = SummaryWriter(log_dir=self.log_dir, comment=self.algorithm_name + "_" + self.env_name)
@@ -119,7 +120,7 @@ class A3C_Conv_Trainer():
 
         # Spawn processes to run data_func
         for _ in range(self.processes_count):
-            data_proc = mp.Process(target=data_func, args=(self.envs, self.policy.model, self.gamma, self.bellman_steps, self.device, train_queue))
+            data_proc = mp.Process(target=data_func, args=(self.envs, self.policy.model, self.gamma, self.bellman_steps, train_queue))
             data_proc.start()
             data_proc_list.append(data_proc)
 
