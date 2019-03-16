@@ -2,6 +2,7 @@ from A2C_Conv.trainer import A2C_Conv_Trainer
 
 
 env_name = "PongNoFrameskip-v4"
+num_envs = 50
 lr_base = 0.0001
 lr_decay = 0.0001
 
@@ -9,9 +10,8 @@ random_seed = 43
 gamma = 0.99                # discount for future rewards
 batch_size = 32       # num of transitions sampled from replay buffer
 
-entropy_beta = 0.001
+entropy_beta = 0.003
 bellman_steps = 4
-num_envs = 50
 clip_grad = 0.1
 
 max_episodes = 10000         # max num of episodes

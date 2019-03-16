@@ -2,7 +2,7 @@ from A3C_Conv.trainer import A3C_Conv_Trainer
 import torch.multiprocessing as mp
 
 env_name = "PongNoFrameskip-v4"
-total_envs = 12
+total_envs = 24
 lr_base = 0.0001
 lr_decay = 0.0001
 
@@ -10,7 +10,7 @@ random_seed = 43
 gamma = 0.99                # discount for future rewards
 batch_size = 32       # num of transitions sampled from replay buffer
 
-entropy_beta = 0.01
+entropy_beta = 0.003
 bellman_steps = 4
 clip_grad = 0.1
 
