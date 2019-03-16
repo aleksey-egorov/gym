@@ -213,8 +213,6 @@ class A3C_Conv_Trainer():
                     if new_rewards:
                         finished, save_checkpoint = tracker.reward(new_rewards[0], step_idx)
                         if finished:
-                            self.reward_history.append(new_rewards[0])
-                            # avg_reward = np.mean(self.reward_history[-100:])
                             episode += 1
                             break
 

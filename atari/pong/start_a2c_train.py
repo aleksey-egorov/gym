@@ -10,8 +10,8 @@ random_seed = 43
 gamma = 0.99                # discount for future rewards
 batch_size = 32       # num of transitions sampled from replay buffer
 
-entropy_beta = 0.003
-bellman_steps = 4
+entropy_beta = 0.002
+bellman_steps = 8
 clip_grad = 0.1
 
 max_episodes = 10000         # max num of episodes
