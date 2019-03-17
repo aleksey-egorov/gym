@@ -171,6 +171,7 @@ class A3C_Conv_Trainer():
                             print("########## Solved! ###########")
                             name = self.filename + '_solved'
                             self.policy.save(self.directory, name)
+                            self.policy.save(self.directory, self.filename)
                             training_time = time.time() - start_time
                             print("Training time: {:6.2f} sec".format(training_time))
                             break
@@ -191,7 +192,7 @@ class A3C_Conv_Trainer():
 
         # loading models
         self.policy.load(self.directory, self.filename)
-        self.exp_source = ptan.experience.ExperienceSourceFirstLast(self.envs, self.policy.agent, gamma=self.gamma,
+        self.exp_source = ptan.experience.ExperienceSourceFirstLast(self.env, self.policy.agent, gamma=self.gamma,
                                                                     steps_count=self.bellman_steps)
 
         self.env.reset()
