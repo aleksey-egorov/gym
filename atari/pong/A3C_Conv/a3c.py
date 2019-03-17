@@ -33,10 +33,6 @@ class A3C_Conv():
         self.optimizer = optim.Adam(self.model.parameters(), lr=self.lr)
 
 
-
-
-
-
     def update(self, batch):
 
         states_v, actions_t, q_vals_v = \

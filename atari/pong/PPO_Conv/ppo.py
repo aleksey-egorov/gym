@@ -37,11 +37,10 @@ class PPO_Conv():
         while not done:
             state = torch.FloatTensor(state).unsqueeze(0).to(device)
             dist, _ = self.model(state)
-            print ("TEST DIST: {}".format(dist.shape))
-            action = torch.argmax(dist.detach().cpu().numpy()[0]) if deterministic \
-                else dist.sample().cpu().numpy()[0]
+            action = dist.sample().cpu().numpy()[0] #) if deterministic else dist.sample().cpu().numpy()[0]
             next_state, reward, done, _ = env.step(action)
             state = next_state
+            #print ("TR: {} R: {}".format(type(total_reward), type(reward)))
             total_reward += reward
         return total_reward
 

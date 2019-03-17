@@ -42,7 +42,7 @@ class A3C_Conv_Trainer():
         self.algorithm_name = 'a3c_conv'
         self.env_name = env_name
         self.total_envs = total_envs
-        self.processes_count = mp.cpu_count()
+        self.processes_count = 3 #mp.cpu_count()
         self.envs_per_process = math.ceil(self.total_envs / self.processes_count)
 
         self.make_env = lambda: ptan.common.wrappers.wrap_dqn(gym.make(self.env_name))
@@ -102,6 +102,7 @@ class A3C_Conv_Trainer():
 
         start_time = time.time()
         print("Envs number: {}".format(self.total_envs))
+        print("Processes: {}".format(self.processes_count))
         print("Envs per process: {}".format(self.envs_per_process))
         print("Action_space: {}".format(self.env.action_space))
         print("Obs_space: {}".format(self.env.observation_space))
@@ -113,10 +114,6 @@ class A3C_Conv_Trainer():
 
         print("Training started ... \n")
         #mp.set_start_method('spawn')
-        try:
-            mp.set_start_method('spawn')
-        except RuntimeError:
-            pass
 
         train_queue = mp.Queue(maxsize=self.processes_count)
         data_proc_list = []
@@ -174,6 +171,7 @@ class A3C_Conv_Trainer():
                             print("########## Solved! ###########")
                             name = self.filename + '_solved'
                             self.policy.save(self.directory, name)
+                            self.policy.save(self.directory, self.filename)
                             training_time = time.time() - start_time
                             print("Training time: {:6.2f} sec".format(training_time))
                             break
@@ -194,7 +192,7 @@ class A3C_Conv_Trainer():
 
         # loading models
         self.policy.load(self.directory, self.filename)
-        self.exp_source = ptan.experience.ExperienceSourceFirstLast(self.envs, self.policy.agent, gamma=self.gamma,
+        self.exp_source = ptan.experience.ExperienceSourceFirstLast(self.env, self.policy.agent, gamma=self.gamma,
                                                                     steps_count=self.bellman_steps)
 
         self.env.reset()
@@ -216,8 +214,6 @@ class A3C_Conv_Trainer():
                     if new_rewards:
                         finished, save_checkpoint = tracker.reward(new_rewards[0], step_idx)
                         if finished:
-                            self.reward_history.append(new_rewards[0])
-                            # avg_reward = np.mean(self.reward_history[-100:])
                             episode += 1
                             break
 
