@@ -147,7 +147,7 @@ class A2C_Conv_Trainer():
 
         # loading models
         self.policy.load(self.directory, self.filename)
-        self.exp_source = ptan.experience.ExperienceSourceFirstLast(self.envs, self.policy.agent, gamma=self.gamma,
+        self.exp_source = ptan.experience.ExperienceSourceFirstLast(self.env, self.policy.agent, gamma=self.gamma,
                                                                     steps_count=self.bellman_steps)
 
         self.env.reset()
@@ -169,8 +169,6 @@ class A2C_Conv_Trainer():
                     if new_rewards:
                         finished, save_checkpoint = tracker.reward(new_rewards[0], step_idx)
                         if finished:
-                            self.reward_history.append(new_rewards[0])
-                            # avg_reward = np.mean(self.reward_history[-100:])
                             episode += 1
                             break
 
