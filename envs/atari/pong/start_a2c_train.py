@@ -16,7 +16,7 @@ random_seed = 43
 gamma = 0.99                # discount for future rewards
 batch_size = 32       # num of transitions sampled from replay buffer
 
-entropy_beta = 0.003
+entropy_beta = 0.005
 bellman_steps = 4
 clip_grad = 0.1
 
