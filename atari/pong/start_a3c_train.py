@@ -1,3 +1,9 @@
+import os
+import sys
+folder = os.path.dirname('../../algorithms/')
+sys.path.append(folder)
+
+
 from A3C_Conv.trainer import A3C_Conv_Trainer
 import torch.multiprocessing as mp
 

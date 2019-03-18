@@ -1,3 +1,9 @@
+import os
+import sys
+folder = os.path.dirname('../../algorithms/')
+sys.path.append(folder)
+
+
 from A2C_Conv.trainer import A2C_Conv_Trainer
 
 

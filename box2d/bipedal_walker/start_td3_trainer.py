@@ -1,4 +1,4 @@
-from TD3_PER.td3 import TD3_PER_Trainer
+from TD3_PER.trainer import TD3_PER_Trainer
 
 env_name = 'BipedalWalker-v2'
 lr_base = 0.0001

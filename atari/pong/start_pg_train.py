@@ -1,3 +1,9 @@
+import os
+import sys
+folder = os.path.dirname('../../algorithms/')
+sys.path.append(folder)
+
+
 from PG_Conv.trainer import PG_Conv_Trainer
 
 

@@ -1,3 +1,9 @@
+import os
+import sys
+folder = os.path.dirname('../../algorithms/')
+sys.path.append(folder)
+
+
 from DQN_Conv.trainer import DQN_Conv_Trainer
 
 

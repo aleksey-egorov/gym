@@ -9,7 +9,7 @@ from tensorboardX import SummaryWriter
 from ARS.utils import mkdir
 
 
-class ARSTrainer():
+class ARS_Trainer():
     def __init__(self,
                  env_name='BipedalWalker-v2',
                  max_episodes=30000,

@@ -1,3 +1,9 @@
+import os
+import sys
+folder = os.path.dirname('../../algorithms/')
+sys.path.append(folder)
+
+
 from PPO_Conv.trainer import PPO_Conv_Trainer
 
 env_name = "PongNoFrameskip-v4"
@@ -9,9 +15,9 @@ gamma = 0.99
 gae_lambda = 0.95
 ppo_epsilon = 0.2
 critic_discount = 0.5
-entropy_beta = 0.01
+entropy_beta = 0.003
 ppo_steps = 256
-batch_size = 64
+batch_size = 32
 ppo_epochs = 10
 test_epochs = 10
 num_tests = 10

@@ -1,3 +1,9 @@
+import os
+import sys
+folder = os.path.dirname('../../algorithms/')
+sys.path.append(folder)
+
+
 from Dueling_DDQN_PER_Conv.trainer import Dueling_DDQN_PER_Conv_Trainer
 
 
