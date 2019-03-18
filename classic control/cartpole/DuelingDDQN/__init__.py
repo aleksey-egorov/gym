@@ -1,5 +1,0 @@
-"""Agent Package
-
-.. moduleauthor::
-
-"""
