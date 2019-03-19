@@ -4,13 +4,13 @@ folder = os.path.dirname('../../../algorithms/')
 sys.path.append(folder)
 
 
-from TD3.trainer import TD3_PER_Trainer
+from TD3_PER.trainer import TD3_PER_Trainer
 
 env_name = 'BipedalWalkerHardcore-v2'
 lr_base = 0.0001
 lr_decay = 0.0001
-exp_noise_base = 0.5
-exp_noise_decay = 0.003  #0.0001
+exp_noise_base = 0.9
+exp_noise_decay = 0.01  #0.0001
 
 random_seed = 42
 gamma = 0.99                # discount for future rewards

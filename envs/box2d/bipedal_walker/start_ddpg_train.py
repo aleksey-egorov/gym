@@ -7,14 +7,14 @@ sys.path.append(folder)
 from DDPG.trainer import DDPG_Trainer
 
 env_name = 'BipedalWalker-v2'
-lr_base = 0.001
+lr_base = 0.0001
 lr_decay = 0.0001
 exp_noise_base = 0.5
 exp_noise_decay = 0.002
 
 random_seed = 42
 gamma = 0.99                # discount for future rewards
-batch_size = 1024           # num of transitions sampled from replay buffer
+batch_size = 128         # num of transitions sampled from replay buffer
 polyak = 0.999               # target policy update parameter (1-tau)
 max_episodes = 100000         # max num of episodes
 max_timesteps = 3000        # max timesteps in one episode
