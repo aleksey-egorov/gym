@@ -12,7 +12,7 @@ device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
 class PPO():
 
-    def __init__(self, state_dim, action_dim, hidden_size, entropy_beta, gamma, gae_lambda, batch_size, ppo_epsilon,
+    def __init__(self, config, action_dim,  entropy_beta, gamma, gae_lambda, batch_size, ppo_epsilon,
                  ppo_epochs, critic_discount):
         super(PPO, self).__init__()
 
@@ -23,7 +23,7 @@ class PPO():
         self.ppo_epsilon = ppo_epsilon
         self.ppo_epochs = ppo_epochs
         self.critic_discount = critic_discount
-        self.model = ActorCritic(state_dim, action_dim, hidden_size).to(device)
+        self.model = ActorCritic(config, action_dim, device)
 
     def set_optimizers(self, lr):
         self.lr = lr

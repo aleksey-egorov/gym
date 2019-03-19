@@ -3,21 +3,30 @@ import torch.nn as nn
 from torch.distributions import Normal
 
 class ActorCritic(nn.Module):
-    def __init__(self, num_inputs, num_outputs, hidden_size, std=0.0):
+    def __init__(self, config, num_outputs, device, std=0.0):
         super(ActorCritic, self).__init__()
 
-        self.critic = nn.Sequential(
-            nn.Linear(num_inputs, hidden_size),
-            nn.ReLU(),
-            nn.Linear(hidden_size, 1)
-        )
+        #self.critic = nn.Sequential(
+        #    nn.Linear(num_inputs, hidden_size),
+        # #   nn.ReLU(),
+        #    nn.Linear(hidden_size, 1)
+        #)
 
-        self.actor = nn.Sequential(
-            nn.Linear(num_inputs, hidden_size),
-            nn.ReLU(),
-            nn.Linear(hidden_size, num_outputs),
-        )
-        self.log_std = nn.Parameter(torch.ones(1, num_outputs) * std)
+        #self.actor = nn.Sequential(
+        #    nn.Linear(num_inputs, hidden_size),
+        #    nn.ReLU(),
+        #    nn.Linear(hidden_size, num_outputs),
+        #)
+
+        actor_config, critic_config = config
+
+        self.actor = FullyConnected(actor_config).create().to(device)
+        self.critic = FullyConnected(critic_config).create().to(device)
+
+        print ("Actor: {} Critic: {} Device: {}".format(self.actor, self.critic, device))
+
+
+        self.log_std = nn.Parameter(torch.ones(1, num_outputs) * std).to(device)
 
     def forward(self, x):
         value = self.critic(x)
@@ -27,7 +36,7 @@ class ActorCritic(nn.Module):
         return dist, value
 
 
-class FullyConnected(nn.Module):
+class FullyConnected():
     def __init__(self, config):
         self.config = config
         self.dropout_default = 0.2

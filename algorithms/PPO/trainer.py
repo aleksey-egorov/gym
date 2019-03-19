@@ -15,7 +15,7 @@ device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
 class PPO_Trainer():
 
-    def __init__(self, env_name, hidden_size=256, num_envs=8, random_seed=42, lr_base=0.0001, lr_decay=0.0001,
+    def __init__(self, env_name, config, num_envs=8, random_seed=42, lr_base=0.0001, lr_decay=0.0001,
                  lr_minimum=1e-7, gamma=0.99, gae_lambda=0.95, ppo_epsilon=0.2, critic_discount=0.5,
                  batch_size=32, entropy_beta=0.001, ppo_steps=256, ppo_epochs=10,
                  test_epochs=10, num_tests=10, log_interval=10, threshold=None,
@@ -41,7 +41,12 @@ class PPO_Trainer():
         else:
             self.threshold = self.env.spec.reward_threshold
 
-        self.hidden_size = hidden_size
+        self.actor_config = config[0]
+        self.critic_config = config[1]
+        self.actor_config[0]['dim'][0] = self.state_dim
+        self.actor_config[-1]['dim'][1] = self.action_dim
+        self.critic_config[0]['dim'][0] = self.state_dim
+        self.config = self.actor_config, self.critic_config
 
         self.random_seed = random_seed
         self.lr_base = lr_base
@@ -67,7 +72,7 @@ class PPO_Trainer():
         self.directory = mkdir(prdir, self.algorithm_name)
         self.filename = "{}_{}_{}".format(self.algorithm_name, self.env_name, self.random_seed)
 
-        self.policy = PPO(self.state_dim, self.action_dim, self.hidden_size, self.entropy_beta, self.gamma,
+        self.policy = PPO(self.config, self.action_dim, self.entropy_beta, self.gamma,
                           self.gae_lambda, self.batch_size, self.ppo_epsilon, self.ppo_epochs, self.critic_discount)
 
         self.reward_history = []

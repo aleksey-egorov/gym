@@ -14,14 +14,14 @@ epsilon_base = 1.0
 epsilon_decay = 0.03
 
 random_seed = 43
-gamma = 0.99                # discount for future rewards
-batch_size = 32       # num of transitions sampled from replay buffer
-max_episodes = 10000         # max num of episodes
-max_timesteps = 3000        # max timesteps in one episode
-max_buffer_length = 40000
+gamma = 0.99
+batch_size = 32
+max_episodes = 10000
+max_timesteps = 3000
+max_buffer_length = 30000
 min_buffer_length = 10000
-log_interval = 10           # print avg reward after interval
-threshold = 19.5
+log_interval = 10
+threshold = 160
 
 
 conv_config = [
