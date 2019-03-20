@@ -15,7 +15,7 @@ gamma = 0.99
 gae_lambda = 0.95
 ppo_epsilon = 0.2
 critic_discount = 0.5
-entropy_beta = 0.001
+entropy_beta = 0.01
 ppo_steps = 256
 batch_size = 64
 ppo_epochs = 10
@@ -26,13 +26,13 @@ log_interval = 10
 
 actor_config = [
     {'dim': [None, 256], 'dropout': False, 'activation': 'relu'},
-    {'dim': [256, 256], 'dropout': True, 'activation': 'relu'},
+   # {'dim': [256, 256], 'dropout': True, 'activation': 'relu'},
     {'dim': [256, None], 'dropout': False, 'activation': False}
 ]
 
 critic_config = [
     {'dim': [None, 256], 'dropout': False, 'activation': 'relu'},
-    {'dim': [256, 256], 'dropout': True, 'activation': 'relu'},
+   # {'dim': [256, 256], 'dropout': True, 'activation': 'relu'},
     {'dim': [256, 1], 'dropout': False, 'activation': False}
 ]
 
