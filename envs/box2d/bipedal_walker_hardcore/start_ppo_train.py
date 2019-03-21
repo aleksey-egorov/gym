@@ -26,13 +26,13 @@ log_interval = 10
 
 actor_config = [
     {'dim': [None, 256], 'dropout': False, 'activation': 'relu'},
-   # {'dim': [256, 256], 'dropout': True, 'activation': 'relu'},
+    {'dim': [256, 256], 'dropout': False, 'activation': 'relu'},
     {'dim': [256, None], 'dropout': False, 'activation': False}
 ]
 
 critic_config = [
     {'dim': [None, 256], 'dropout': False, 'activation': 'relu'},
-   # {'dim': [256, 256], 'dropout': True, 'activation': 'relu'},
+    {'dim': [256, 256], 'dropout': False, 'activation': 'relu'},
     {'dim': [256, 1], 'dropout': False, 'activation': False}
 ]
 

@@ -8,7 +8,7 @@ from Dueling_DDQN_PER_Conv.trainer import Dueling_DDQN_PER_Conv_Trainer
 
 
 env_name = "Breakout-v0"
-lr_base = 0.0001
+lr_base = 0.00001
 lr_decay = 0.0001
 epsilon_base = 1.0
 epsilon_decay = 0.03
@@ -25,7 +25,7 @@ max_timesteps = 3000        # max timesteps in one episode
 max_buffer_length = 25000
 min_buffer_length = 10000
 log_interval = 10           # print avg reward after interval
-threshold = 160
+threshold = 200
 
 
 conv_config = [
