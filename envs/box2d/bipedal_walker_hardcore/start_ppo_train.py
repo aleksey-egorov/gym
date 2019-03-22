@@ -7,7 +7,7 @@ sys.path.append(folder)
 from PPO.trainer import PPO_Trainer
 
 env_name = 'BipedalWalkerHardcore-v2'
-num_envs = 32
+num_envs = 64
 lr_base = 0.0001
 lr_decay = 0.0001
 random_seed = 42
@@ -23,7 +23,7 @@ test_epochs = 10
 num_tests = 10
 log_interval = 10
 
-
+'''
 actor_config = [
     {'dim': [None, 256], 'dropout': False, 'activation': 'relu'},
     {'dim': [256, 256], 'dropout': False, 'activation': 'relu'},
@@ -34,6 +34,18 @@ critic_config = [
     {'dim': [None, 256], 'dropout': False, 'activation': 'relu'},
     {'dim': [256, 256], 'dropout': False, 'activation': 'relu'},
     {'dim': [256, 1], 'dropout': False, 'activation': False}
+] '''
+
+actor_config = [
+    {'dim': [None, 256], 'dropout': False, 'activation': 'relu'},
+    {'dim': [256, 256], 'dropout': True, 'activation': 'relu'},
+    {'dim': [256, None], 'dropout': False, 'activation':  False}
+]
+
+critic_config = [
+    {'dim': [None, 512], 'dropout': False, 'activation': 'relu'},
+    {'dim': [512, 256], 'dropout': False, 'activation': 'relu'},
+    {'dim': [256, 1], 'dropout': False, 'activation': False},
 ]
 
 config = [actor_config, critic_config]

@@ -29,7 +29,7 @@ max_buffer_length = 4000000
 log_interval = 10           # print avg reward after interval
 
 
-
+'''
 actor_config = [
         {'dim': [None, 256], 'dropout': False, 'activation': 'relu'},
         {'dim': [256, 320], 'dropout': True, 'activation':'relu'},
@@ -44,9 +44,9 @@ critic_config = [
         {'dim': [320, 160], 'dropout': False, 'activation': 'relu'},
         {'dim': [160, 1], 'dropout': False, 'activation': False}
     ]
-
-
 '''
+
+
 actor_config = [
     {'dim': [None, 256], 'dropout': False, 'activation': 'relu'},
     {'dim': [256, 256], 'dropout': True, 'activation': 'relu'},
@@ -60,7 +60,8 @@ critic_config = [
     {'dim': [512, 128], 'dropout': False, 'activation': 'relu'},
     {'dim': [128, 1], 'dropout': False, 'activation': False},
 ]
-'''
+
+
 
 
 agent = TD3_PER_Trainer(env_name, actor_config, critic_config, random_seed=random_seed, lr_base=lr_base, lr_decay=lr_decay,
