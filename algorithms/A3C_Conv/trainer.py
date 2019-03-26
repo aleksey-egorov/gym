@@ -155,13 +155,13 @@ class A3C_Conv_Trainer():
                         res = self.policy.update(batch)
                         adv_v, value_v, q_vals_v, entropy_loss_v, loss_policy_v, loss_value_v, loss_v = res
 
-                        tb_tracker.track("advantage", adv_v, step_idx)
-                        tb_tracker.track("values", value_v, step_idx)
-                        tb_tracker.track("batch_rewards", q_vals_v, step_idx)
-                        tb_tracker.track("loss_entropy", entropy_loss_v, step_idx)
-                        tb_tracker.track("loss_policy", loss_policy_v, step_idx)
-                        tb_tracker.track("loss_value", loss_value_v, step_idx)
-                        tb_tracker.track("loss_total", loss_v, step_idx)
+                        tb_tracker.track("advantage", adv_v.cpu(), step_idx)
+                        tb_tracker.track("values", value_v.cpu(), step_idx)
+                        tb_tracker.track("batch_rewards", q_vals_v.cpu(), step_idx)
+                        tb_tracker.track("loss_entropy", entropy_loss_v.cpu(), step_idx)
+                        tb_tracker.track("loss_policy", loss_policy_v.cpu(), step_idx)
+                        tb_tracker.track("loss_value", loss_value_v.cpu(), step_idx)
+                        tb_tracker.track("loss_total", loss_v.cpu(), step_idx)
 
                         if len(self.reward_history) > 100:
                             self.reward_history.pop(0)
