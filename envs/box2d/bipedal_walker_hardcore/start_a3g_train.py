@@ -11,7 +11,7 @@ lr = 0.0001
 gamma = 0.99
 tau = 1.00
 random_seed = 1
-workers = 32
+workers = 8
 num_steps = 20
 
 max_episode_length = 10000
