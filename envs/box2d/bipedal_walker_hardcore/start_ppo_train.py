@@ -35,19 +35,7 @@ critic_config = [
     {'dim': [512, 256], 'dropout': False, 'activation': 'relu'},
     {'dim': [256, 1], 'dropout': False, 'activation': False}
 ]
-'''
-actor_config = [
-    {'dim': [None, 256], 'dropout': False, 'activation': 'relu'},
-    {'dim': [256, 256], 'dropout': True, 'activation': 'relu'},
-    {'dim': [256, None], 'dropout': False, 'activation':  False}
-]
 
-critic_config = [
-    {'dim': [None, 512], 'dropout': False, 'activation': 'relu'},
-    {'dim': [512, 256], 'dropout': False, 'activation': 'relu'},
-    {'dim': [256, 1], 'dropout': False, 'activation': False},
-]
-'''
 config = [actor_config, critic_config]
 
 agent = PPO_Trainer(env_name, config, num_envs=num_envs, random_seed=random_seed, lr_base=lr_base, lr_decay=lr_decay,
