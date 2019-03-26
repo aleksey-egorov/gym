@@ -181,7 +181,7 @@ class PG_Trainer():
         algdir = mkdir(gifdir, self.algorithm_name)
 
         t = 0
-        for episode in range(1, episode s +1):
+        for episode in range(1, episodes+1):
             ep_reward = 0.0
             epdir = mkdir(algdir, str(episode))
 
@@ -192,7 +192,8 @@ class PG_Trainer():
                 if save_gif:
                     img = self.env.render(mode = 'rgb_array')
                     img = Image.fromarray(img)
-                    img.save('{}/{}.jpg'.format(epdir, t)) t+= 1
+                    img.save('{}/{}.jpg'.format(epdir, t))
+                    t+= 1
 
                 # handle when an episode is completed
                 episode_rewards = self.exp_source.pop_total_rewards()
