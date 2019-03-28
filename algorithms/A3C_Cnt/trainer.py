@@ -43,8 +43,8 @@ class A3C_Cnt_Trainer():
         if gpu_ids == -1:
             self.gpu_ids = [-1]
         else:
+            self.gpu_ids = gpu_ids
             torch.cuda.manual_seed(self.random_seed)
-            mp.set_start_method('spawn')
 
         if self.random_seed:
             print("Random Seed: {}".format(self.random_seed))
@@ -67,6 +67,11 @@ class A3C_Cnt_Trainer():
             self.optimizer.share_memory()
         else:
             self.optimizer = None
+
+
+    def train(self):
+
+        print ("Training started ... ")
 
         args = {
             'env': self.env_name,
@@ -99,3 +104,21 @@ class A3C_Cnt_Trainer():
         for p in self.processes:
             time.sleep(0.1)
             p.join()
+
+    def test(self):
+        args = {
+            'env': self.env_name,
+            'gpu_ids': self.gpu_ids,
+            'log_dir': self.log_dir,
+            'seed': self.random_seed,
+            'stack_frames': self.stack_frames,
+            'model': self.model,
+            'save_max': self.save_max,
+            'save_model_dir': self.save_dir,
+            'lr': self.lr,
+            'num_steps': self.num_steps,
+            'gamma': self.gamma,
+            'tau': self.tau,
+            'max_episode_length': self.max_episode_length
+        }
+        test(args, self.shared_model)

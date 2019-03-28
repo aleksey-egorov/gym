@@ -49,6 +49,7 @@ def test(args, shared_model):
             player.state = player.state.cuda()
     player.model.eval()
     max_score = 0
+
     while True:
         if player.done:
             if gpu_id >= 0:
