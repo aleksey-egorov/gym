@@ -18,13 +18,14 @@ class A3C_Cnt_Trainer():
     def __init__(self, env_name, random_seed=1, lr=0.0001,
                    gamma=0.99, tau=0.99, workers=32, num_steps=10,
                    max_episode_length=100000, shared_optimizer=True, save_max=True,
-                   optimizer=False, model='MLP', stack_frames=1, gpu_ids=-1, amsgrad=True):
+                   optimizer=False, model='MLP', stack_frames=1, gpu_ids=-1, amsgrad=True, threshold=None):
 
         self.algorithm_name = 'a3c_cnt'
         self.env_name = env_name
         self.stack_frames = stack_frames
         self.env = env = create_env(self.env_name, self.stack_frames)
 
+        self.threshold = threshold
         self.random_seed = random_seed
         self.shared_optimizer = shared_optimizer
         self.optimizer = optimizer
@@ -72,7 +73,6 @@ class A3C_Cnt_Trainer():
     def train(self):
 
         print ("Training started ... ")
-
         args = {
             'env': self.env_name,
             'gpu_ids': self.gpu_ids,
@@ -88,7 +88,6 @@ class A3C_Cnt_Trainer():
             'tau': self.tau,
             'max_episode_length': self.max_episode_length
         }
-
         self.processes = []
 
         p = mp.Process(target=test, args=(args, self.shared_model))
@@ -106,6 +105,10 @@ class A3C_Cnt_Trainer():
             p.join()
 
     def test(self):
+
+        saved_state = torch.load('{0}{1}.dat'.format(self.save_dir, self.env), map_location=lambda storage, loc: storage)
+        self.shared_model.load_state_dict(saved_state)
+
         args = {
             'env': self.env_name,
             'gpu_ids': self.gpu_ids,
