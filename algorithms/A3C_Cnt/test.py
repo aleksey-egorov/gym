@@ -2,7 +2,7 @@ from __future__ import division
 from setproctitle import setproctitle as ptitle
 import numpy as np
 import torch
-from torch.autograd import Variable
+from PIL import Image
 import time
 import logging
 
@@ -46,6 +46,8 @@ def test(args, shared_model):
         player.model = A3C_CONV(args['stack_frames'], player.env.action_space)
 
     player.state = player.env.reset()
+    if args['render'] == True:
+        player.env.render()
     player.state = torch.from_numpy(player.state).float()
     if gpu_id >= 0:
         with torch.cuda.device(gpu_id):
@@ -53,6 +55,7 @@ def test(args, shared_model):
             player.state = player.state.cuda()
     player.model.eval()
     max_score = 0
+    t = 0
     testing = True
 
     while testing:
@@ -64,6 +67,15 @@ def test(args, shared_model):
                 player.model.load_state_dict(shared_model.state_dict())
 
         player.action_test()
+        if args['render'] == True:
+            player.env.render()
+
+        if args['save_gif'] == True:
+            img = player.env.render(mode='rgb_array')
+            img = Image.fromarray(img)
+            img.save('gif/1/{}.jpg'.format(t))
+            t += 1
+
         reward_sum += player.reward
         reward_history.append(reward_sum)
 

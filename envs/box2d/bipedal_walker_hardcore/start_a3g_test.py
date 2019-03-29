@@ -31,6 +31,6 @@ if __name__ == '__main__':
                        gamma=gamma, tau=tau, workers=workers, num_steps=num_steps,
                        max_episode_length=max_episode_length, shared_optimizer=shared_optimizer, save_max=save_max,
                        optimizer=optimizer, model=model, stack_frames=stack_frames, gpu_ids=gpu_ids, amsgrad=amsgrad)
-    agent.train()
+
 
     agent.test()

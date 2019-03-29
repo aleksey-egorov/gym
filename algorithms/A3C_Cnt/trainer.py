@@ -86,7 +86,9 @@ class A3C_Cnt_Trainer():
             'num_steps': self.num_steps,
             'gamma': self.gamma,
             'tau': self.tau,
-            'max_episode_length': self.max_episode_length
+            'max_episode_length': self.max_episode_length,
+            'render': False,
+            'save_gif': False
         }
         self.processes = []
 
@@ -106,7 +108,7 @@ class A3C_Cnt_Trainer():
 
     def test(self):
 
-        saved_state = torch.load('{0}{1}.dat'.format(self.save_dir, self.env), map_location=lambda storage, loc: storage)
+        saved_state = torch.load('{0}{1}.dat'.format(self.save_dir, self.env_name), map_location=lambda storage, loc: storage)
         self.shared_model.load_state_dict(saved_state)
 
         args = {
@@ -122,6 +124,8 @@ class A3C_Cnt_Trainer():
             'num_steps': self.num_steps,
             'gamma': self.gamma,
             'tau': self.tau,
-            'max_episode_length': self.max_episode_length
+            'max_episode_length': self.max_episode_length,
+            'render': True,
+            'save_gif': True
         }
         test(args, self.shared_model)
