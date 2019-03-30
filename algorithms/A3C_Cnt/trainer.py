@@ -41,6 +41,11 @@ class A3C_Cnt_Trainer():
         self.log_dir = './log/'
         self.save_dir = './saved_models/'
 
+        if not threshold == None:
+            self.threshold = threshold
+        else:
+            self.threshold = self.env.spec.reward_threshold
+
         if gpu_ids == -1:
             self.gpu_ids = [-1]
         else:
@@ -88,7 +93,8 @@ class A3C_Cnt_Trainer():
             'tau': self.tau,
             'max_episode_length': self.max_episode_length,
             'render': False,
-            'save_gif': False
+            'save_gif': False,
+            'threshold': self.threshold
         }
         self.processes = []
 
@@ -126,6 +132,7 @@ class A3C_Cnt_Trainer():
             'tau': self.tau,
             'max_episode_length': self.max_episode_length,
             'render': True,
-            'save_gif': True
+            'save_gif': True,
+            'threshold': self.threshold
         }
         test(args, self.shared_model)

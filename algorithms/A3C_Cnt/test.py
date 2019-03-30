@@ -79,13 +79,13 @@ def test(args, shared_model):
         reward_sum += player.reward
         reward_history.append(reward_sum)
 
-        if len(reward_history) > 1000:
+        if len(reward_history) > 2000:
             reward_history.pop(0)
 
         if player.done:
             num_tests += 1
             reward_total_sum += reward_sum
-            reward_mean = np.mean(reward_history[-100:])
+            reward_mean = np.mean(reward_history[-1000:])
             log['{}_log'.format(args['env'])].info(
                 "Time {0}, episode reward {1}, episode length {2}, reward mean {3:.4f}".
                 format(
@@ -103,7 +103,7 @@ def test(args, shared_model):
                     state_to_save = player.model.state_dict()
                     torch.save(state_to_save, '{0}{1}.dat'.format(args['save_model_dir'], args['env']))
 
-            if reward_mean >= 300:
+            if reward_mean >= args['threshold']:
                 testing = False
             else:
                 reward_sum = 0
