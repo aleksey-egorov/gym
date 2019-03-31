@@ -6,7 +6,7 @@ sys.path.append(folder)
 
 from PPO_Conv.trainer import PPO_Conv_Trainer
 
-env_name = "BreakoutNoFrameskip-v0"
+env_name = "Breakout-v0"
 num_envs = 32
 lr_base = 0.001
 lr_decay = 0.0001

@@ -5,7 +5,7 @@ import torch
 import numpy as np
 from tensorboardX import SummaryWriter
 from PIL import Image
-from gym import wrappers
+
 
 from PPO_Conv import wrappers
 from PPO_Conv.ppo import PPO_Conv
