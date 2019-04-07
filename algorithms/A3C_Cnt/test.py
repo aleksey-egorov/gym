@@ -7,7 +7,7 @@ import time
 import logging
 
 from A3C_Cnt.env import create_env
-from A3C_Cnt.utils import setup_logger
+from A3C_Cnt.utils import setup_logger, mkdir
 from A3C_Cnt.model import A3C_CONV, A3C_MLP
 from A3C_Cnt.player_util import Agent
 
@@ -71,6 +71,7 @@ def test(args, shared_model):
             player.env.render()
 
         if args['save_gif'] == True:
+            mkdir('gif', '1')
             img = player.env.render(mode='rgb_array')
             img = Image.fromarray(img)
             img.save('gif/1/{}.jpg'.format(t))
@@ -85,7 +86,7 @@ def test(args, shared_model):
         if player.done:
             num_tests += 1
             reward_total_sum += reward_sum
-            reward_mean = np.mean(reward_history[-1000:])
+            reward_mean = np.mean(reward_history[-500:])
             log['{}_log'.format(args['env'])].info(
                 "Time {0}, episode reward {1}, episode length {2}, reward mean {3:.4f}".
                 format(
