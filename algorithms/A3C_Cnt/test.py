@@ -2,21 +2,24 @@ from __future__ import division
 from setproctitle import setproctitle as ptitle
 import numpy as np
 import torch
-from torch.autograd import Variable
+from PIL import Image
 import time
 import logging
 
 from A3C_Cnt.env import create_env
-from A3C_Cnt.utils import setup_logger
+from A3C_Cnt.utils import setup_logger, mkdir
 from A3C_Cnt.model import A3C_CONV, A3C_MLP
 from A3C_Cnt.player_util import Agent
 
 
 
 def test(args, shared_model):
+
     ptitle('Test Agent')
     gpu_id = args['gpu_ids'][-1]
+    reward_history = []
     log = {}
+
     setup_logger('{}_log'.format(args['env']),
                  r'{0}{1}_log'.format(args['log_dir'], args['env']))
     log['{}_log'.format(args['env'])] = logging.getLogger(
@@ -35,6 +38,7 @@ def test(args, shared_model):
     reward_total_sum = 0
     player = Agent(None, env, args, None)
     player.gpu_id = gpu_id
+
     if args['model'] == 'MLP':
         player.model = A3C_MLP(
             player.env.observation_space.shape[0], player.env.action_space, args['stack_frames'])
@@ -42,6 +46,8 @@ def test(args, shared_model):
         player.model = A3C_CONV(args['stack_frames'], player.env.action_space)
 
     player.state = player.env.reset()
+    if args['render'] == True:
+        player.env.render()
     player.state = torch.from_numpy(player.state).float()
     if gpu_id >= 0:
         with torch.cuda.device(gpu_id):
@@ -49,7 +55,10 @@ def test(args, shared_model):
             player.state = player.state.cuda()
     player.model.eval()
     max_score = 0
-    while True:
+    t = 0
+    testing = True
+
+    while testing:
         if player.done:
             if gpu_id >= 0:
                 with torch.cuda.device(gpu_id):
@@ -58,12 +67,26 @@ def test(args, shared_model):
                 player.model.load_state_dict(shared_model.state_dict())
 
         player.action_test()
+        if args['render'] == True:
+            player.env.render()
+
+        if args['save_gif'] == True:
+            mkdir('gif', '1')
+            img = player.env.render(mode='rgb_array')
+            img = Image.fromarray(img)
+            img.save('gif/1/{}.jpg'.format(t))
+            t += 1
+
         reward_sum += player.reward
+        reward_history.append(reward_sum)
+
+        if len(reward_history) > 2000:
+            reward_history.pop(0)
 
         if player.done:
             num_tests += 1
             reward_total_sum += reward_sum
-            reward_mean = reward_total_sum / num_tests
+            reward_mean = np.mean(reward_history[-500:])
             log['{}_log'.format(args['env'])].info(
                 "Time {0}, episode reward {1}, episode length {2}, reward mean {3:.4f}".
                 format(
@@ -81,11 +104,14 @@ def test(args, shared_model):
                     state_to_save = player.model.state_dict()
                     torch.save(state_to_save, '{0}{1}.dat'.format(args['save_model_dir'], args['env']))
 
-            reward_sum = 0
-            player.eps_len = 0
-            state = player.env.reset()
-            time.sleep(60)
-            player.state = torch.from_numpy(state).float()
-            if gpu_id >= 0:
-                with torch.cuda.device(gpu_id):
-                    player.state = player.state.cuda()
+            if reward_mean >= args['threshold']:
+                testing = False
+            else:
+                reward_sum = 0
+                player.eps_len = 0
+                state = player.env.reset()
+                time.sleep(60)
+                player.state = torch.from_numpy(state).float()
+                if gpu_id >= 0:
+                    with torch.cuda.device(gpu_id):
+                        player.state = player.state.cuda()

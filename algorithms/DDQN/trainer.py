@@ -82,8 +82,6 @@ class DDQN_Trainer():
         # loading models
         self.policy.load(self.directory, self.filename)
 
-        # logging variables:
-        log_f = open("train_{}.txt".format(self.algorithm_name), "w+")
 
         print("\nTraining started ... ")
 
@@ -120,9 +118,6 @@ class DDQN_Trainer():
             self.reward_history.append(ep_reward)
             avg_reward = np.mean(self.reward_history[-100:])
 
-            # logging updates:
-            log_f.write('{},{}\n'.format(episode, ep_reward))
-            log_f.flush()
 
             if len(self.policy.Q_loss_list) > 0:
                 avg_Q_loss = np.mean(self.policy.Q_loss_list[-100:])
@@ -152,7 +147,6 @@ class DDQN_Trainer():
                 print("########## Solved! ###########")
                 name = self.filename + '_solved'
                 self.policy.save(self.directory, name)
-                log_f.close()
                 self.env.close()
                 training_time = time.time() - start_time
                 print("Training time: {:6.2f} sec".format(training_time))

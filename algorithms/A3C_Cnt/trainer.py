@@ -18,13 +18,14 @@ class A3C_Cnt_Trainer():
     def __init__(self, env_name, random_seed=1, lr=0.0001,
                    gamma=0.99, tau=0.99, workers=32, num_steps=10,
                    max_episode_length=100000, shared_optimizer=True, save_max=True,
-                   optimizer=False, model='MLP', stack_frames=1, gpu_ids=-1, amsgrad=True):
+                   optimizer=False, model='MLP', stack_frames=1, gpu_ids=-1, amsgrad=True, threshold=None):
 
         self.algorithm_name = 'a3c_cnt'
         self.env_name = env_name
         self.stack_frames = stack_frames
         self.env = env = create_env(self.env_name, self.stack_frames)
 
+        self.threshold = threshold
         self.random_seed = random_seed
         self.shared_optimizer = shared_optimizer
         self.optimizer = optimizer
@@ -39,12 +40,18 @@ class A3C_Cnt_Trainer():
         self.max_episode_length = max_episode_length
         self.log_dir = './log/'
         self.save_dir = './saved_models/'
+        self.load = True
+
+        if not threshold == None:
+            self.threshold = threshold
+        else:
+            self.threshold = self.env.spec.reward_threshold
 
         if gpu_ids == -1:
             self.gpu_ids = [-1]
         else:
+            self.gpu_ids = gpu_ids
             torch.cuda.manual_seed(self.random_seed)
-            mp.set_start_method('spawn')
 
         if self.random_seed:
             print("Random Seed: {}".format(self.random_seed))
@@ -56,7 +63,11 @@ class A3C_Cnt_Trainer():
             self.shared_model = A3C_MLP(env.observation_space.shape[0], env.action_space, self.stack_frames)
         if self.model == 'CONV':
             self.shared_model = A3C_CONV(self.stack_frames, env.action_space)
-
+        if self.load:
+            saved_state = torch.load('{0}{1}.dat'.format(
+                self.save_dir, self.env_name), map_location=lambda storage, loc: storage)
+            self.shared_model.load_state_dict(saved_state)
+            print ("Model loaded")
         self.shared_model.share_memory()
 
         if self.shared_optimizer:
@@ -68,6 +79,10 @@ class A3C_Cnt_Trainer():
         else:
             self.optimizer = None
 
+
+    def train(self):
+
+        print ("Training started ... ")
         args = {
             'env': self.env_name,
             'gpu_ids': self.gpu_ids,
@@ -81,9 +96,11 @@ class A3C_Cnt_Trainer():
             'num_steps': self.num_steps,
             'gamma': self.gamma,
             'tau': self.tau,
-            'max_episode_length': self.max_episode_length
+            'max_episode_length': self.max_episode_length,
+            'render': False,
+            'save_gif': False,
+            'threshold': self.threshold
         }
-
         self.processes = []
 
         p = mp.Process(target=test, args=(args, self.shared_model))
@@ -99,3 +116,28 @@ class A3C_Cnt_Trainer():
         for p in self.processes:
             time.sleep(0.1)
             p.join()
+
+    def test(self):
+
+        saved_state = torch.load('{0}{1}.dat'.format(self.save_dir, self.env_name), map_location=lambda storage, loc: storage)
+        self.shared_model.load_state_dict(saved_state)
+
+        args = {
+            'env': self.env_name,
+            'gpu_ids': self.gpu_ids,
+            'log_dir': self.log_dir,
+            'seed': self.random_seed,
+            'stack_frames': self.stack_frames,
+            'model': self.model,
+            'save_max': self.save_max,
+            'save_model_dir': self.save_dir,
+            'lr': self.lr,
+            'num_steps': self.num_steps,
+            'gamma': self.gamma,
+            'tau': self.tau,
+            'max_episode_length': self.max_episode_length,
+            'render': True,
+            'save_gif': True,
+            'threshold': self.threshold
+        }
+        test(args, self.shared_model)
