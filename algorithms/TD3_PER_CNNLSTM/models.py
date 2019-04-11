@@ -42,6 +42,7 @@ class Actor(nn.Module):
         self.train()
 
     def forward(self, state):
+        state = state.unsqueeze(0)
 
         x = self.lrelu1(self.conv1(state))
         x = self.lrelu2(self.conv2(x))
@@ -90,6 +91,7 @@ class Critic(nn.Module):
         self.train()
 
     def forward(self, state, action):
+        state = state.unsqueeze(0)
         state_action = torch.cat([state, action], 1)
 
         x = self.lrelu1(self.conv1(state_action))

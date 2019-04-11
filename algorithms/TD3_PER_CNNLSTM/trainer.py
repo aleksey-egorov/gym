@@ -12,7 +12,7 @@ from TD3_PER_CNNLSTM.utils import mkdir
 from TD3_PER_CNNLSTM.buffer import PrioritizedReplayBuffer
 
 
-class TD3_PER_Trainer():
+class TD3_PER_CNNLSTM_Trainer():
 
     def __init__(self, env_name,  random_seed=42, lr_base=0.001, lr_decay=0.00005,
                  exp_noise_base=0.3, exp_noise_decay=0.0001, gamma=0.99, batch_size=1024,
