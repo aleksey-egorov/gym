@@ -85,6 +85,7 @@ def train(rank, args, shared_model, optimizer):
             state = player.state
             if args['model'] == 'CONV':
                 state = state.unsqueeze(0)
+            print ("STATE: {}".format(state.shape))
             value, _, _, _ = player.model(
                 (Variable(state), (player.hx, player.cx)))
             R = value.data

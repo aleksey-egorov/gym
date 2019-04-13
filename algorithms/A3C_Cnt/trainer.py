@@ -64,9 +64,12 @@ class A3C_Cnt_Trainer():
         if self.model == 'CONV':
             self.shared_model = A3C_CONV(self.stack_frames, env.action_space)
         if self.load:
-            saved_state = torch.load('{0}{1}.dat'.format(
-                self.save_dir, self.env_name), map_location=lambda storage, loc: storage)
-            self.shared_model.load_state_dict(saved_state)
+            try:
+                saved_state = torch.load('{0}{1}.dat'.format(
+                    self.save_dir, self.env_name), map_location=lambda storage, loc: storage)
+                self.shared_model.load_state_dict(saved_state)
+            except:
+                pass
             print ("Model loaded")
         self.shared_model.share_memory()
 

@@ -42,7 +42,8 @@ class Actor(nn.Module):
         self.train()
 
     def forward(self, state):
-        state = state.unsqueeze(0)
+        #state = state.unsqueeze(0)
+        print ("STATE:{}".format(state.shape))
 
         x = self.lrelu1(self.conv1(state))
         x = self.lrelu2(self.conv2(x))
