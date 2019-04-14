@@ -73,7 +73,7 @@ class TD3_PER_CNNLSTM_Trainer():
         self.directory = mkdir(prdir, self.algorithm_name)
         self.filename = "{}_{}_{}".format(self.algorithm_name, self.env_name, self.random_seed)
 
-        self.policy = TD3_PER_CNNLSTM(self.state_dim, self.action_dim, self.action_low, self.action_high)
+        self.policy = TD3_PER_CNNLSTM(self.state_dim, self.action_dim, self.action_low, self.action_high, self.batch_size)
         self.replay_buffer = PrioritizedReplayBuffer(size=self.max_buffer_length, alpha=self.alpha)
 
         self.reward_history = []

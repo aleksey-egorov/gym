@@ -39,7 +39,8 @@ class Actor(nn.Module):
 
         self.train()
 
-    def forward(self, state):
+    def forward(self, state, hid):
+        hx, cx = hid
         #state = state.unsqueeze(0)
         print("STATE PRE: {}".format(state.shape))
 
@@ -50,10 +51,10 @@ class Actor(nn.Module):
 
         print("STATE PRE LSTM: {}".format(x.shape))
         x = x.view(x.size(0), -1).to(device)
-        hx, cx = self.lstm(x, (self.hx, self.cx))
+        hx, cx = self.lstm(x, (hx, cx))
         x = hx
 
-        return self.actor_linear(x)
+        return self.actor_linear(x), (hx, cx)
 
 
 class Critic(nn.Module):

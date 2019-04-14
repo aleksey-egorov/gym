@@ -1,6 +1,7 @@
 import torch
 import torch.nn.functional as F
 import torch.optim as optim
+from torch.autograd import Variable
 
 from TD3_PER_CNNLSTM.models import Actor, Critic
 
@@ -8,8 +9,9 @@ from TD3_PER_CNNLSTM.models import Actor, Critic
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
 class TD3_PER_CNNLSTM:
-    def __init__(self, state_dim, action_dim, action_low, action_high):
+    def __init__(self, state_dim, action_dim, action_low, action_high, batch_size):
 
+        self.batch_size = batch_size
         self.action_low = action_low[0]
         self.action_high = action_high[0]
 
@@ -36,6 +38,12 @@ class TD3_PER_CNNLSTM:
         self.critic_2_target = Critic(state_dim, action_dim).to(device)
         self.critic_2_target.load_state_dict(self.critic_2.state_dict())
 
+        self.cx_eval = Variable(torch.zeros(1, 128))
+        self.hx_eval = Variable(torch.zeros(1, 128))
+
+        self.cx = Variable(torch.zeros(self.batch_size, 128))
+        self.hx = Variable(torch.zeros(self.batch_size, 128))
+
         self.max_loss_list = 100
 
 
@@ -47,7 +55,7 @@ class TD3_PER_CNNLSTM:
     
     def select_action(self, state):
         state = torch.FloatTensor(state).to(device)
-        return self.actor(state).cpu().data.numpy().flatten()
+        return self.actor(state, (self.hx_eval, self.cx_eval))[0].cpu().data.numpy().flatten()
     
     def update(self, replay_buffer, n_iter, batch_size, gamma, polyak, policy_noise, noise_clip, policy_delay, beta):
         
@@ -64,7 +72,9 @@ class TD3_PER_CNNLSTM:
             # Select next action according to target policy:
             noise = torch.FloatTensor(action_).data.normal_(0, policy_noise).to(device)
             noise = noise.clamp(-noise_clip, noise_clip)
-            next_action = (self.actor_target(next_state) + noise)
+            next_pred, hid = self.actor_target(next_state, (self.hx, self.cx))
+            self.hx, self.cx = hid
+            next_action = next_pred + noise
             next_action = next_action.clamp(int(self.action_low), int(self.action_high))
             
             # Compute target Q-value:
@@ -92,7 +102,7 @@ class TD3_PER_CNNLSTM:
             # Delayed policy updates:
             if i % policy_delay == 0:
                 # Compute actor loss:
-                self.actor_loss = -self.critic_1(state, self.actor(state)).mean()
+                self.actor_loss = -self.critic_1(state, self.actor(state, (self.hx, self.cx))[0]).mean()
                 #self.actor_loss = - 0.5 * (self.critic_1(state, self.actor(state)).mean() + self.critic_2(state, self.actor(state)).mean())
                 self.actor_loss_list.append(self.actor_loss.item())
                 

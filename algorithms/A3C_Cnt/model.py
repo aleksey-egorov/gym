@@ -49,7 +49,7 @@ class A3C_CONV(torch.nn.Module):
 
         self.train()
 
-    def forward(self, inputs):
+    def forward(self, inputs, ):
         x, (hx, cx) = inputs
         print ("STATE PRE: {}".format(x.shape))
 
