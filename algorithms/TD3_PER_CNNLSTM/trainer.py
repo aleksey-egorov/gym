@@ -36,7 +36,7 @@ class TD3_PER_CNNLSTM_Trainer():
             monitor_dir = mkdir(videos_dir, self.algorithm_name)
             should_record = lambda i: self.should_record
             self.env = wrappers.Monitor(self.env, monitor_dir, video_callable=should_record, force=True)
-        self.state_dim = self.env.observation_space.shape[0]
+        self.state_dim = self.stack_frames
         self.action_dim = self.env.action_space.shape[0]
         self.action_low = self.env.action_space.low
         self.action_high = self.env.action_space.high
@@ -125,7 +125,8 @@ class TD3_PER_CNNLSTM_Trainer():
 
                 # take action in env:
                 next_state, reward, done, _ = self.env.step(action)
-                self.replay_buffer.add(state, action, reward, next_state, float(done))
+                print ("TRAINER STATE: {} NEXT: {}".format(state.shape, next_state.shape))
+                self.replay_buffer.add(state.squeeze(0), action, reward, next_state.squeeze(0), float(done))
                 state = next_state
 
                 ep_reward += reward

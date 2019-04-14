@@ -54,6 +54,7 @@ class TD3_PER_CNNLSTM:
         for i in range(n_iter):
             # Sample a batch of transitions from replay buffer:
             state, action_, reward, next_state, done, weights, indexes = replay_buffer.sample(batch_size, beta)
+
             state = torch.FloatTensor(state).to(device)
             action = torch.FloatTensor(action_).to(device)
             reward = torch.FloatTensor(reward).reshape((batch_size,1)).to(device)

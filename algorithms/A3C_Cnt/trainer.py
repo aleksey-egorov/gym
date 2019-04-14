@@ -122,8 +122,12 @@ class A3C_Cnt_Trainer():
 
     def test(self):
 
-        saved_state = torch.load('{0}{1}.dat'.format(self.save_dir, self.env_name), map_location=lambda storage, loc: storage)
-        self.shared_model.load_state_dict(saved_state)
+        try:
+            saved_state = torch.load('{0}{1}.dat'.format(self.save_dir, self.env_name), map_location=lambda storage, loc: storage)
+            self.shared_model.load_state_dict(saved_state)
+        except:
+            print ("Cant load test")
+            pass
 
         args = {
             'env': self.env_name,

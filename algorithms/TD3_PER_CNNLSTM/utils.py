@@ -63,7 +63,7 @@ class FrameStack(gym.Wrapper):
     def observation(self):
         assert len(self.frames) == self.stack_frames
         st = np.stack(self.frames, axis=0)
-        st = np.swapaxes(st, 0, 1)
+        #st = np.swapaxes(st, 0, 1)
         st = np.expand_dims(st, axis=0)
         return st
 

@@ -11,6 +11,7 @@ from A3C_Cnt.utils import norm_col_init, weights_init, weights_init_mlp
 class A3C_CONV(torch.nn.Module):
     def __init__(self, num_inputs, action_space):
         super(A3C_CONV, self).__init__()
+        print ("NUM INPUTS: {}".format(num_inputs))
         self.conv1 = nn.Conv1d(num_inputs, 32, 3, stride=1, padding=1)
         self.lrelu1 = nn.LeakyReLU(0.1)
         self.conv2 = nn.Conv1d(32, 32, 3, stride=1, padding=1)
@@ -50,12 +51,14 @@ class A3C_CONV(torch.nn.Module):
 
     def forward(self, inputs):
         x, (hx, cx) = inputs
+        print ("STATE PRE: {}".format(x.shape))
 
         x = self.lrelu1(self.conv1(x))
         x = self.lrelu2(self.conv2(x))
         x = self.lrelu3(self.conv3(x))
         x = self.lrelu4(self.conv4(x))
 
+        print("STATE PRE LSTM: {}".format(x.shape))
         x = x.view(x.size(0), -1)
         hx, cx = self.lstm(x, (hx, cx))
         x = hx
