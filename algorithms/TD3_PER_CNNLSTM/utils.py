@@ -62,7 +62,10 @@ class FrameStack(gym.Wrapper):
 
     def observation(self):
         assert len(self.frames) == self.stack_frames
-        return np.stack(self.frames, axis=0).reshape(1, self.stack_frames, -1)
+        st = np.stack(self.frames, axis=0)
+        st = np.swapaxes(st, 0, 1)
+        st = np.expand_dims(st, axis=0)
+        return st
 
 
 class MaxMinFilter():

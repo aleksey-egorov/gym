@@ -50,6 +50,7 @@ class Actor(nn.Module):
         x = self.lrelu3(self.conv3(x))
         x = self.lrelu4(self.conv4(x))
 
+        print ("SH:{}".format(x.shape))
         x = x.view(x.size(0), -1)
         hx, cx = self.lstm(x, (self.hx, self.cx))
         x = hx
