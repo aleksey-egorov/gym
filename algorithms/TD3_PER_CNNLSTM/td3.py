@@ -46,7 +46,7 @@ class TD3_PER_CNNLSTM:
         self.critic_2_optimizer = optim.Adam(self.critic_2.parameters(), lr=self.lr)
     
     def select_action(self, state):
-        state = torch.FloatTensor(state.reshape(1, -1)).to(device)
+        state = torch.FloatTensor(state).to(device)
         return self.actor(state).cpu().data.numpy().flatten()
     
     def update(self, replay_buffer, n_iter, batch_size, gamma, polyak, policy_noise, noise_clip, policy_delay, beta):

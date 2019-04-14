@@ -8,7 +8,7 @@ from PIL import Image
 from tensorboardX import SummaryWriter
 
 from TD3_PER_CNNLSTM.td3 import TD3_PER_CNNLSTM
-from TD3_PER_CNNLSTM.utils import mkdir
+from TD3_PER_CNNLSTM.utils import mkdir, FrameStack
 from TD3_PER_CNNLSTM.buffer import PrioritizedReplayBuffer
 
 
@@ -21,9 +21,11 @@ class TD3_PER_CNNLSTM_Trainer():
                  log_interval=5, threshold=None, lr_minimum=1e-10, exp_noise_minimum=1e-10,
                  record_videos=True, record_interval=100, alpha=0.9, beta_base=0.3, beta_multiplier=0.0001, log_dir='./log/'):
 
+        self.stack_frames = 4
         self.algorithm_name = 'td3_cnnlstm'
         self.env_name = env_name
-        self.env = gym.make(env_name)
+        env = gym.make(env_name)
+        self.env = FrameStack(env, self.stack_frames)
         self.log_dir = os.path.join(log_dir, self.algorithm_name)
         self.writer = SummaryWriter(log_dir=self.log_dir, comment=self.algorithm_name + "_" + self.env_name)
 
@@ -105,6 +107,7 @@ class TD3_PER_CNNLSTM_Trainer():
 
             ep_reward = 0.0
             state = self.env.reset()
+            print ("STATE INIT: {}".format(state.shape))
 
             # calculate params
             exploration_noise = max(self.exp_noise_base / (1.0 + episode * self.exp_noise_decay),

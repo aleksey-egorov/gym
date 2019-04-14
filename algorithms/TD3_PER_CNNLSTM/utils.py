@@ -1,6 +1,8 @@
 import os
 import numpy as np
 import torch
+import gym
+from collections import deque
 
 
 def mkdir(base, name):
@@ -32,3 +34,46 @@ def norm_col_init(weights, std=1.0):
     x = torch.randn(weights.size())
     x *= std / torch.sqrt((x**2).sum(1, keepdim=True))
     return x
+
+
+
+class FrameStack(gym.Wrapper):
+    def __init__(self, env, stack_frames):
+        super().__init__(env)
+        self.stack_frames = stack_frames
+        self.frames = deque([], maxlen=self.stack_frames)
+        self.obs_norm = MaxMinFilter() #NormalizedEnv() alternative or can just not normalize observations as environment is already kinda normalized
+
+
+    def reset(self):
+        ob = self.env.reset()
+        ob = np.float32(ob)
+        ob = self.obs_norm(ob)
+        for _ in range(self.stack_frames):
+            self.frames.append(ob)
+        return self.observation()
+
+    def step(self, action):
+        ob, rew, done, info = self.env.step(action)
+        ob = np.float32(ob)
+        ob = self.obs_norm(ob)
+        self.frames.append(ob)
+        return self.observation(), rew, done, info
+
+    def observation(self):
+        assert len(self.frames) == self.stack_frames
+        return np.stack(self.frames, axis=0).reshape(1, self.stack_frames, -1)
+
+
+class MaxMinFilter():
+    def __init__(self):
+        self.mx_d = 3.15
+        self.mn_d = -3.15
+        self.new_maxd = 10.0
+        self.new_mind = -10.0
+
+    def __call__(self, x):
+        obs = x.clip(self.mn_d, self.mx_d)
+        new_obs = (((obs - self.mn_d) * (self.new_maxd - self.new_mind)
+                    ) / (self.mx_d - self.mn_d)) + self.new_mind
+        return new_obs
