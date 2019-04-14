@@ -39,10 +39,6 @@ class Actor(nn.Module):
 
         self.train()
 
-    def set_hidden(self, n):
-        self.cx = Variable(torch.zeros(n, 128)).to(device)
-        self.hx = Variable(torch.zeros(n, 128)).to(device)
-
     def forward(self, state):
         #state = state.unsqueeze(0)
         print("STATE PRE: {}".format(state.shape))
