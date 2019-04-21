@@ -44,6 +44,12 @@ class TD3_PER_CNNLSTM:
         self.cx = Variable(torch.zeros(self.batch_size, 128))
         self.hx = Variable(torch.zeros(self.batch_size, 128))
 
+        self.cxc1 = Variable(torch.zeros(self.batch_size, 128))
+        self.hxc1 = Variable(torch.zeros(self.batch_size, 128))
+
+        self.cxc2 = Variable(torch.zeros(self.batch_size, 128))
+        self.hxc2 = Variable(torch.zeros(self.batch_size, 128))
+
         self.max_loss_list = 100
 
 
@@ -73,18 +79,18 @@ class TD3_PER_CNNLSTM:
             noise = torch.FloatTensor(action_).data.normal_(0, policy_noise).to(device)
             noise = noise.clamp(-noise_clip, noise_clip)
             next_pred, hid = self.actor_target(next_state, (self.hx, self.cx))
-            self.hx, self.cx = hid
+            #self.hx, self.cx = hid
             next_action = next_pred + noise
             next_action = next_action.clamp(int(self.action_low), int(self.action_high))
             
             # Compute target Q-value:
-            target_Q1 = self.critic_1_target(next_state, next_action)
-            target_Q2 = self.critic_2_target(next_state, next_action)
+            target_Q1, hid = self.critic_1_target(next_state, next_action, (self.hxc1, self.cxc1))
+            target_Q2, hid = self.critic_2_target(next_state, next_action, (self.hxc2, self.cxc2))
             target_Q = torch.min(target_Q1, target_Q2)
             target_Q = reward + ((1-done) * gamma * target_Q).detach()
             
             # Optimize Critic 1:
-            current_Q1 = self.critic_1(state, action)
+            current_Q1, _ = self.critic_1(state, action, (self.hxc1, self.cxc1))
             self.Q1_loss = F.mse_loss(current_Q1, target_Q)
             self.critic_1_optimizer.zero_grad()
             self.Q1_loss.backward()
@@ -92,7 +98,7 @@ class TD3_PER_CNNLSTM:
             self.Q1_loss_list.append(self.Q1_loss.item())
             
             # Optimize Critic 2:
-            current_Q2 = self.critic_2(state, action)
+            current_Q2, _ = self.critic_2(state, action, (self.hxc2, self.cxc2))
             self.Q2_loss = F.mse_loss(current_Q2, target_Q)
             self.critic_2_optimizer.zero_grad()
             self.Q2_loss.backward()
@@ -102,13 +108,15 @@ class TD3_PER_CNNLSTM:
             # Delayed policy updates:
             if i % policy_delay == 0:
                 # Compute actor loss:
-                self.actor_loss = -self.critic_1(state, self.actor(state, (self.hx, self.cx))[0]).mean()
+                act_val, hid = self.actor(state, (self.hx, self.cx))
+                self.hx, self.cx = hid
+                self.actor_loss = -self.critic_1(state, act_val, (self.hxc1, self.cxc1))[0].mean()
                 #self.actor_loss = - 0.5 * (self.critic_1(state, self.actor(state)).mean() + self.critic_2(state, self.actor(state)).mean())
                 self.actor_loss_list.append(self.actor_loss.item())
                 
                 # Optimize the actor
                 self.actor_optimizer.zero_grad()
-                self.actor_loss.backward()
+                self.actor_loss.backward(retain_graph=True)
                 self.actor_optimizer.step()
                 
                 # Polyak averaging update:

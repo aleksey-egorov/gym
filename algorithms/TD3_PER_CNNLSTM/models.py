@@ -42,14 +42,15 @@ class Actor(nn.Module):
     def forward(self, state, hid):
         hx, cx = hid
         #state = state.unsqueeze(0)
-        print("STATE PRE: {}".format(state.shape))
 
+        #print("ACT STATE PRE CONV: {}".format(state.shape))
         x = self.lrelu1(self.conv1(state))
+        #print("CRT STATE PRE CONV2: {}".format(x.shape))
         x = self.lrelu2(self.conv2(x))
         x = self.lrelu3(self.conv3(x))
         x = self.lrelu4(self.conv4(x))
 
-        print("STATE PRE LSTM: {}".format(x.shape))
+        #print("ACT STATE PRE LSTM: {}".format(x.shape))
         x = x.view(x.size(0), -1).to(device)
         hx, cx = self.lstm(x, (hx, cx))
         x = hx
@@ -60,7 +61,8 @@ class Actor(nn.Module):
 class Critic(nn.Module):
     def __init__(self, num_inputs, action_space):
         super().__init__()
-        self.conv1 = nn.Conv1d(num_inputs + action_space, 32, 3, stride=1, padding=1)
+        self.input_dim = num_inputs
+        self.conv1 = nn.Conv1d(self.input_dim, 32, 3, stride=1, padding=1)
         self.lrelu1 = nn.LeakyReLU(0.1)
         self.conv2 = nn.Conv1d(32, 32, 3, stride=1, padding=1)
         self.lrelu2 = nn.LeakyReLU(0.1)
@@ -69,7 +71,7 @@ class Critic(nn.Module):
         self.conv4 = nn.Conv1d(64, 64, 1, stride=1)
         self.lrelu4 = nn.LeakyReLU(0.1)
 
-        self.lstm = nn.LSTMCell(1600, 128)
+        self.lstm = nn.LSTMCell(1856, 128)
         self.critic_linear = nn.Linear(128, 1)
 
         self.apply(weights_init)
@@ -91,17 +93,25 @@ class Critic(nn.Module):
 
         self.train()
 
-    def forward(self, state, action):
-        state = state.unsqueeze(0)
-        state_action = torch.cat([state, action], 1)
+    def forward(self, state, action, hid):
+        hx, cx = hid
 
+        #print("INPUT DIM: {}".format(self.input_dim))
+        action = action.unsqueeze(2)
+        action = torch.stack([action, action, action, action], dim=2).squeeze(3)
+        #print("CRT STATE PRE CAT: {} {}".format(state.shape, action.shape))
+        state_action = torch.cat([state, action], 2)
+
+        #print("CRT STATE PRE CONV: {}".format(state_action.shape))
         x = self.lrelu1(self.conv1(state_action))
+        #print("CRT STATE PRE CONV2: {}".format(state_action.shape))
         x = self.lrelu2(self.conv2(x))
         x = self.lrelu3(self.conv3(x))
         x = self.lrelu4(self.conv4(x))
 
+        #print("CRT STATE PRE LSTM: {}".format(x.shape))
         x = x.view(x.size(0), -1)
-        hx, cx = self.lstm(x, (self.hx, self.cx))
+        hx, cx = self.lstm(x, (hx, cx))
         x = hx
 
-        return self.critic_linear(x)
+        return self.critic_linear(x), (hx, cx)

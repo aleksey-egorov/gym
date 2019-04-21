@@ -125,7 +125,6 @@ class TD3_PER_CNNLSTM_Trainer():
 
                 # take action in env:
                 next_state, reward, done, _ = self.env.step(action)
-                print ("TRAINER STATE: {} NEXT: {}".format(state.shape, next_state.shape))
                 self.replay_buffer.add(state.squeeze(0), action, reward, next_state.squeeze(0), float(done))
                 state = next_state
 
