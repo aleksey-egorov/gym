@@ -38,17 +38,17 @@ class TD3_PER_CNNLSTM:
         self.critic_2_target = Critic(state_dim, action_dim).to(device)
         self.critic_2_target.load_state_dict(self.critic_2.state_dict())
 
-        self.cx_eval = Variable(torch.zeros(1, 128))
-        self.hx_eval = Variable(torch.zeros(1, 128))
+        self.cx_eval = Variable(torch.zeros(1, 128)).to(device)
+        self.hx_eval = Variable(torch.zeros(1, 128)).to(device)
 
-        self.cx = Variable(torch.zeros(self.batch_size, 128))
-        self.hx = Variable(torch.zeros(self.batch_size, 128))
+        self.cx = Variable(torch.zeros(self.batch_size, 128)).to(device)
+        self.hx = Variable(torch.zeros(self.batch_size, 128)).to(device)
 
-        self.cxc1 = Variable(torch.zeros(self.batch_size, 128))
-        self.hxc1 = Variable(torch.zeros(self.batch_size, 128))
+        self.cxc1 = Variable(torch.zeros(self.batch_size, 128)).to(device)
+        self.hxc1 = Variable(torch.zeros(self.batch_size, 128)).to(device)
 
-        self.cxc2 = Variable(torch.zeros(self.batch_size, 128))
-        self.hxc2 = Variable(torch.zeros(self.batch_size, 128))
+        self.cxc2 = Variable(torch.zeros(self.batch_size, 128)).to(device)
+        self.hxc2 = Variable(torch.zeros(self.batch_size, 128)).to(device)
 
         self.max_loss_list = 100
 

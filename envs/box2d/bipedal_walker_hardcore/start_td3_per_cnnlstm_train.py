@@ -14,7 +14,7 @@ exp_noise_decay = 0.01  #0.0001
 
 random_seed = 42
 gamma = 0.99                # discount for future rewards
-batch_size = 256        # num of transitions sampled from replay buffer
+batch_size = 64        # num of transitions sampled from replay buffer
 polyak = 0.9999              # target policy update parameter (1-tau)
 policy_noise = 0.2          # target policy smoothing noise
 noise_clip = 0.5
