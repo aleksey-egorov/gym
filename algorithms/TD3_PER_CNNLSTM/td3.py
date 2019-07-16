@@ -51,6 +51,7 @@ class TD3_PER_CNNLSTM:
         self.hxc2 = Variable(torch.zeros(self.batch_size, 128)).to(device)
 
         self.max_loss_list = 100
+        print ("Init TD3 CNNLSTM ")
 
 
     def set_optimizers(self, lr):
