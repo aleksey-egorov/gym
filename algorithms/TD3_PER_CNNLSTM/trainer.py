@@ -107,7 +107,7 @@ class TD3_PER_CNNLSTM_Trainer():
 
             ep_reward = 0.0
             state = self.env.reset()
-            print ("STATE INIT: {}".format(state.shape))
+            #print ("STATE INIT: {}".format(state.shape))
 
             # calculate params
             exploration_noise = max(self.exp_noise_base / (1.0 + episode * self.exp_noise_decay),
