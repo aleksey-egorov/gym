@@ -50,7 +50,11 @@ class TD3_PER_CNNLSTM:
     
     def select_action(self, state):
         state = torch.FloatTensor(state).to(device)
-        return self.actor(state, type='eval').cpu().data.numpy().flatten()
+        act = self.actor(state, type='eval')
+        print ("act: {}".format(act))
+        act_val = act.cpu().data.numpy().flatten()
+        print ("act_val: {}".format(act_val))
+        return act_val
     
     def update(self, replay_buffer, n_iter, batch_size, gamma, polyak, policy_noise, noise_clip, policy_delay, beta):
         
