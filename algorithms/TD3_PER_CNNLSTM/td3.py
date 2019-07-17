@@ -117,9 +117,9 @@ class TD3_PER_CNNLSTM:
                 
                 # Optimize the actor
                 self.actor_optimizer.zero_grad()
-                self.actor_loss.backward(retain_graph=True)
+                self.actor_loss.backward()  #retain_graph=True
                 self.actor_optimizer.step()
-                
+
                 # Polyak averaging update:
                 for param, target_param in zip(self.actor.parameters(), self.actor_target.parameters()):
                     target_param.data.copy_( (polyak * target_param.data) + ((1-polyak) * param.data))
