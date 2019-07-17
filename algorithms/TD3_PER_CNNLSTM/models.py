@@ -13,23 +13,23 @@ class Actor(nn.Module):
         print("NUM INPUTS: {}".format(num_inputs))
 
         self.batch_size = batch_size
-        self.cx = Variable(torch.zeros(self.batch_size, 128))
-        self.hx = Variable(torch.zeros(self.batch_size, 128))
+        self.cx = Variable(torch.zeros(self.batch_size, 128)).to(device)
+        self.hx = Variable(torch.zeros(self.batch_size, 128)).to(device)
 
-        self.cx_eval = Variable(torch.zeros(1, 128))
-        self.hx_eval = Variable(torch.zeros(1, 128))
+        self.cx_eval = Variable(torch.zeros(1, 128)).to(device)
+        self.hx_eval = Variable(torch.zeros(1, 128)).to(device)
 
-        self.conv1 = nn.Conv1d(num_inputs, 32, 3, stride=1, padding=1)
+        self.conv1 = nn.Conv1d(num_inputs, 32, 3, stride=1, padding=1).to(device)
         self.lrelu1 = nn.LeakyReLU(0.1)
-        self.conv2 = nn.Conv1d(32, 32, 3, stride=1, padding=1)
+        self.conv2 = nn.Conv1d(32, 32, 3, stride=1, padding=1).to(device)
         self.lrelu2 = nn.LeakyReLU(0.1)
-        self.conv3 = nn.Conv1d(32, 64, 2, stride=1, padding=1)
+        self.conv3 = nn.Conv1d(32, 64, 2, stride=1, padding=1).to(device)
         self.lrelu3 = nn.LeakyReLU(0.1)
-        self.conv4 = nn.Conv1d(64, 64, 1, stride=1)
+        self.conv4 = nn.Conv1d(64, 64, 1, stride=1).to(device)
         self.lrelu4 = nn.LeakyReLU(0.1)
 
-        self.lstm = nn.LSTMCell(1600, 128)
-        self.actor_linear = nn.Linear(128, action_space)
+        self.lstm = nn.LSTMCell(1600, 128).to(device)
+        self.actor_linear = nn.Linear(128, action_space).to(device)
 
         self.apply(weights_init)
         lrelu_gain = nn.init.calculate_gain('leaky_relu')
