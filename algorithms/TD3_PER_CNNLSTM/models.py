@@ -62,7 +62,6 @@ class Actor(nn.Module):
         x = x.view(x.size(0), -1).to(device)
 
         if type == 'train':
-            print (x, self.hx, self.cx)
             self.hx, self.cx = self.lstm(x, (self.hx, self.cx))
             x = self.hx
         elif type == 'eval':
@@ -77,21 +76,21 @@ class Critic(nn.Module):
         super().__init__()
 
         self.batch_size = batch_size
-        self.cxc = Variable(torch.zeros(self.batch_size, 128))
-        self.hxc = Variable(torch.zeros(self.batch_size, 128))
+        self.cxc = Variable(torch.zeros(self.batch_size, 128)).to(device)
+        self.hxc = Variable(torch.zeros(self.batch_size, 128)).to(device)
 
         self.input_dim = num_inputs
-        self.conv1 = nn.Conv1d(self.input_dim, 32, 3, stride=1, padding=1)
+        self.conv1 = nn.Conv1d(self.input_dim, 32, 3, stride=1, padding=1).to(device)
         self.lrelu1 = nn.LeakyReLU(0.1)
-        self.conv2 = nn.Conv1d(32, 32, 3, stride=1, padding=1)
+        self.conv2 = nn.Conv1d(32, 32, 3, stride=1, padding=1).to(device)
         self.lrelu2 = nn.LeakyReLU(0.1)
-        self.conv3 = nn.Conv1d(32, 64, 2, stride=1, padding=1)
+        self.conv3 = nn.Conv1d(32, 64, 2, stride=1, padding=1).to(device)
         self.lrelu3 = nn.LeakyReLU(0.1)
-        self.conv4 = nn.Conv1d(64, 64, 1, stride=1)
+        self.conv4 = nn.Conv1d(64, 64, 1, stride=1).to(device)
         self.lrelu4 = nn.LeakyReLU(0.1)
 
-        self.lstm = nn.LSTMCell(1856, 128)
-        self.critic_linear = nn.Linear(128, 1)
+        self.lstm = nn.LSTMCell(1856, 128).to(device)
+        self.critic_linear = nn.Linear(128, 1).to(device)
 
         self.apply(weights_init)
         lrelu_gain = nn.init.calculate_gain('leaky_relu')
