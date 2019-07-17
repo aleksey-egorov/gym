@@ -16,8 +16,8 @@ class Actor(nn.Module):
         self.cx = Variable(torch.zeros(self.batch_size, 128))
         self.hx = Variable(torch.zeros(self.batch_size, 128))
 
-        self.cx_eval = Variable(torch.zeros(1, 128)).to(device)
-        self.hx_eval = Variable(torch.zeros(1, 128)).to(device)
+        self.cx_eval = Variable(torch.zeros(1, 128))
+        self.hx_eval = Variable(torch.zeros(1, 128))
 
         self.conv1 = nn.Conv1d(num_inputs, 32, 3, stride=1, padding=1)
         self.lrelu1 = nn.LeakyReLU(0.1)
@@ -62,6 +62,7 @@ class Actor(nn.Module):
         x = x.view(x.size(0), -1).to(device)
 
         if type == 'train':
+            print (x, self.hx, self.cx)
             self.hx, self.cx = self.lstm(x, (self.hx, self.cx))
             x = self.hx
         elif type == 'eval':
@@ -76,8 +77,8 @@ class Critic(nn.Module):
         super().__init__()
 
         self.batch_size = batch_size
-        self.cxc = Variable(torch.zeros(self.batch_size, 128)).to(device)
-        self.hxc = Variable(torch.zeros(self.batch_size, 128)).to(device)
+        self.cxc = Variable(torch.zeros(self.batch_size, 128))
+        self.hxc = Variable(torch.zeros(self.batch_size, 128))
 
         self.input_dim = num_inputs
         self.conv1 = nn.Conv1d(self.input_dim, 32, 3, stride=1, padding=1)

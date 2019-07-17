@@ -67,7 +67,7 @@ class TD3_PER_CNNLSTM:
             # Select next action according to target policy:
             noise = torch.FloatTensor(action_).data.normal_(0, policy_noise).to(device)
             noise = noise.clamp(-noise_clip, noise_clip)
-            next_pred = self.actor_target(next_state)
+            next_pred = self.actor_target(next_state).cpu()
             #self.hx, self.cx = hid
             next_action = next_pred + noise
             next_action = next_action.clamp(int(self.action_low), int(self.action_high))
