@@ -26,29 +26,17 @@ class TD3_PER_CNNLSTM:
         #self.main_policy = ConvLSTM_Policy(state_dim, action_dim).to(device)
         #self.target_policy = ConvLSTM_Policy(state_dim, action_dim).to(device)
 
-        self.actor = Actor(state_dim, action_dim).to(device)
-        self.actor_target = Actor(state_dim, action_dim).to(device)
+        self.actor = Actor(state_dim, action_dim, self.batch_size).to(device)
+        self.actor_target = Actor(state_dim, action_dim, self.batch_size).to(device)
         self.actor_target.load_state_dict(self.actor.state_dict())
         
-        self.critic_1 = Critic(state_dim, action_dim).to(device)
-        self.critic_1_target = Critic(state_dim, action_dim).to(device)
+        self.critic_1 = Critic(state_dim, action_dim, self.batch_size).to(device)
+        self.critic_1_target = Critic(state_dim, action_dim, self.batch_size).to(device)
         self.critic_1_target.load_state_dict(self.critic_1.state_dict())
         
-        self.critic_2 = Critic(state_dim, action_dim).to(device)
-        self.critic_2_target = Critic(state_dim, action_dim).to(device)
+        self.critic_2 = Critic(state_dim, action_dim, self.batch_size).to(device)
+        self.critic_2_target = Critic(state_dim, action_dim, self.batch_size).to(device)
         self.critic_2_target.load_state_dict(self.critic_2.state_dict())
-
-        self.cx_eval = Variable(torch.zeros(1, 128)).to(device)
-        self.hx_eval = Variable(torch.zeros(1, 128)).to(device)
-
-        self.cx = Variable(torch.zeros(self.batch_size, 128)).to(device)
-        self.hx = Variable(torch.zeros(self.batch_size, 128)).to(device)
-
-        self.cxc1 = Variable(torch.zeros(self.batch_size, 128)).to(device)
-        self.hxc1 = Variable(torch.zeros(self.batch_size, 128)).to(device)
-
-        self.cxc2 = Variable(torch.zeros(self.batch_size, 128)).to(device)
-        self.hxc2 = Variable(torch.zeros(self.batch_size, 128)).to(device)
 
         self.max_loss_list = 100
         print ("Init TD3 CNNLSTM ")
@@ -62,7 +50,7 @@ class TD3_PER_CNNLSTM:
     
     def select_action(self, state):
         state = torch.FloatTensor(state).to(device)
-        return self.actor(state, (self.hx_eval, self.cx_eval))[0].cpu().data.numpy().flatten()
+        return self.actor(state, type='eval').cpu().data.numpy().flatten()
     
     def update(self, replay_buffer, n_iter, batch_size, gamma, polyak, policy_noise, noise_clip, policy_delay, beta):
         
@@ -75,58 +63,58 @@ class TD3_PER_CNNLSTM:
             reward = torch.FloatTensor(reward).reshape((batch_size,1)).to(device)
             next_state = torch.FloatTensor(next_state).to(device)
             done = torch.FloatTensor(done).reshape((batch_size,1)).to(device)
-            
+
             # Select next action according to target policy:
             noise = torch.FloatTensor(action_).data.normal_(0, policy_noise).to(device)
             noise = noise.clamp(-noise_clip, noise_clip)
-            next_pred, hid = self.actor_target(next_state, (self.hx, self.cx))
+            next_pred = self.actor_target(next_state)
             #self.hx, self.cx = hid
             next_action = next_pred + noise
             next_action = next_action.clamp(int(self.action_low), int(self.action_high))
             
             # Compute target Q-value:
-            target_Q1, hid = self.critic_1_target(next_state, next_action, (self.hxc1, self.cxc1))
-            target_Q2, hid = self.critic_2_target(next_state, next_action, (self.hxc2, self.cxc2))
+            target_Q1 = self.critic_1_target(next_state, next_action)
+            target_Q2 = self.critic_2_target(next_state, next_action)
             target_Q = torch.min(target_Q1, target_Q2)
             target_Q = reward + ((1-done) * gamma * target_Q).detach()
-            
+
             # Optimize Critic 1:
-            current_Q1, _ = self.critic_1(state, action, (self.hxc1, self.cxc1))
+            current_Q1 =  self.critic_1(state, action)
             self.Q1_loss = F.mse_loss(current_Q1, target_Q)
             self.critic_1_optimizer.zero_grad()
-            self.Q1_loss.backward()
+            self.Q1_loss.backward(retain_graph=True)
             self.critic_1_optimizer.step()
             self.Q1_loss_list.append(self.Q1_loss.item())
             
             # Optimize Critic 2:
-            current_Q2, _ = self.critic_2(state, action, (self.hxc2, self.cxc2))
+            current_Q2 = self.critic_2(state, action)
             self.Q2_loss = F.mse_loss(current_Q2, target_Q)
             self.critic_2_optimizer.zero_grad()
-            self.Q2_loss.backward()
+            self.Q2_loss.backward(retain_graph=True)
             self.critic_2_optimizer.step()
             self.Q2_loss_list.append(self.Q2_loss.item())
             
             # Delayed policy updates:
             if i % policy_delay == 0:
+
                 # Compute actor loss:
-                act_val, hid = self.actor(state, (self.hx, self.cx))
-                self.hx, self.cx = hid
-                self.actor_loss = -self.critic_1(state, act_val, (self.hxc1, self.cxc1))[0].mean()
-                #self.actor_loss = - 0.5 * (self.critic_1(state, self.actor(state)).mean() + self.critic_2(state, self.actor(state)).mean())
+                act_val = self.actor(state)
+                self.actor_loss = -self.critic_1(state, act_val).mean()
+                # self.actor_loss = - 0.5 * (self.critic_1(state, self.actor(state)).mean() + self.critic_2(state, self.actor(state)).mean())
                 self.actor_loss_list.append(self.actor_loss.item())
-                
+
                 # Optimize the actor
                 self.actor_optimizer.zero_grad()
-                self.actor_loss.backward()  #retain_graph=True
+                self.actor_loss.backward(retain_graph=True)
                 self.actor_optimizer.step()
 
                 # Polyak averaging update:
                 for param, target_param in zip(self.actor.parameters(), self.actor_target.parameters()):
                     target_param.data.copy_( (polyak * target_param.data) + ((1-polyak) * param.data))
-                
+
                 for param, target_param in zip(self.critic_1.parameters(), self.critic_1_target.parameters()):
                     target_param.data.copy_( (polyak * target_param.data) + ((1-polyak) * param.data))
-                
+
                 for param, target_param in zip(self.critic_2.parameters(), self.critic_2_target.parameters()):
                     target_param.data.copy_( (polyak * target_param.data) + ((1-polyak) * param.data))
                     

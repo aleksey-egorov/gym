@@ -8,9 +8,17 @@ device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
 
 class Actor(nn.Module):
-    def __init__(self, num_inputs, action_space):
+    def __init__(self, num_inputs, action_space, batch_size):
         super().__init__()
         print("NUM INPUTS: {}".format(num_inputs))
+
+        self.batch_size = batch_size
+        self.cx = Variable(torch.zeros(self.batch_size, 128))
+        self.hx = Variable(torch.zeros(self.batch_size, 128))
+
+        self.cx_eval = Variable(torch.zeros(1, 128)).to(device)
+        self.hx_eval = Variable(torch.zeros(1, 128)).to(device)
+
         self.conv1 = nn.Conv1d(num_inputs, 32, 3, stride=1, padding=1)
         self.lrelu1 = nn.LeakyReLU(0.1)
         self.conv2 = nn.Conv1d(32, 32, 3, stride=1, padding=1)
@@ -39,8 +47,8 @@ class Actor(nn.Module):
 
         self.train()
 
-    def forward(self, state, hid):
-        hx, cx = hid
+    def forward(self, state, type='train'):
+        #hx, cx = hid
         #state = state.unsqueeze(0)
 
         #print("ACT STATE PRE CONV: {}".format(state.shape))
@@ -52,15 +60,25 @@ class Actor(nn.Module):
 
         #print("ACT STATE PRE LSTM: {}".format(x.shape))
         x = x.view(x.size(0), -1).to(device)
-        hx, cx = self.lstm(x, (hx, cx))
-        x = hx
 
-        return self.actor_linear(x), (hx, cx)
+        if type == 'train':
+            self.hx, self.cx = self.lstm(x, (self.hx, self.cx))
+            x = self.hx
+        elif type == 'eval':
+            self.hx_eval, self.cx_eval = self.lstm(x, (self.hx_eval, self.cx_eval))
+            x = self.hx_eval
+
+        return self.actor_linear(x)
 
 
 class Critic(nn.Module):
-    def __init__(self, num_inputs, action_space):
+    def __init__(self, num_inputs, action_space, batch_size):
         super().__init__()
+
+        self.batch_size = batch_size
+        self.cxc = Variable(torch.zeros(self.batch_size, 128)).to(device)
+        self.hxc = Variable(torch.zeros(self.batch_size, 128)).to(device)
+
         self.input_dim = num_inputs
         self.conv1 = nn.Conv1d(self.input_dim, 32, 3, stride=1, padding=1)
         self.lrelu1 = nn.LeakyReLU(0.1)
@@ -88,13 +106,9 @@ class Critic(nn.Module):
         self.lstm.bias_ih.data.fill_(0)
         self.lstm.bias_hh.data.fill_(0)
 
-        self.cx = Variable(torch.zeros(1, 128))
-        self.hx = Variable(torch.zeros(1, 128))
-
         self.train()
 
-    def forward(self, state, action, hid):
-        hx, cx = hid
+    def forward(self, state, action):
 
         #print("INPUT DIM: {}".format(self.input_dim))
         action = action.unsqueeze(2)
@@ -111,7 +125,7 @@ class Critic(nn.Module):
 
         #print("CRT STATE PRE LSTM: {}".format(x.shape))
         x = x.view(x.size(0), -1)
-        hx, cx = self.lstm(x, (hx, cx))
-        x = hx
+        self.hxc, self.cxc = self.lstm(x, (self.hxc, self.cxc))
+        x = self.hxc
 
-        return self.critic_linear(x), (hx, cx)
+        return self.critic_linear(x)
