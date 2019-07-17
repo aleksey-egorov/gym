@@ -7,6 +7,6 @@ For better performance or production purposes I recommend using <a href='https:/
 
 ### Some solved environments
 
-<img style='float:left' height=160 src='envs/atari/pong/results/duel_ddqn.gif'>
-<img style='float:left' height=160 src='envs/box2d/bipedal_walker_hardcore/results/ac3.gif'>
-<img style='float:left' height=160 src='envs/box2d/lunar_lander_continuous/results/td3.gif'>
+<div style='float:left' ><img height=160 src='envs/atari/pong/results/duel_ddqn.gif'></div>
+<div style='float:left' ><img style='float:left' height=160 src='envs/box2d/bipedal_walker_hardcore/results/ac3.gif'></div>
+<div style='float:left' ><img style='float:left' height=160 src='envs/box2d/lunar_lander_continuous/results/td3.gif'></div>
