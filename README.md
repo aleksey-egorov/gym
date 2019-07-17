@@ -7,5 +7,5 @@ For better performance or production purposes I recommend using <a href='https:/
 
 ### Some solved environments
 
-<img src='envs/atari/pong/results/duel_ddqn.gif'>
-<img src='envs/box2d/bipedal_walker_hardcore/results/ac3.gif'>
+<img height=160 src='envs/atari/pong/results/duel_ddqn.gif'>
+<img height=160 src='envs/box2d/bipedal_walker_hardcore/results/ac3.gif'>
