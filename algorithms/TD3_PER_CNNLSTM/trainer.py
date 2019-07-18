@@ -102,8 +102,8 @@ class TD3_PER_CNNLSTM_Trainer():
         for episode in range(1, self.max_episodes + 1):
 
             # Only record video during evaluation, every n steps
-            if episode % self.record_interval == 0:
-                self.should_record = True
+            #if episode % self.record_interval == 0:
+            #    self.should_record = True
 
             ep_reward = 0.0
             state = self.env.reset()
