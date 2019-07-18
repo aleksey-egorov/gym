@@ -63,15 +63,9 @@ class Actor(nn.Module):
         x = x.view(x.size(0), -1).to(device)
         hx = copy.copy(self.hx)
         cx = copy.copy(self.cx)
-        hx_eval = copy.copy(self.hx_eval)
-        cx_eval = copy.copy(self.cx_eval)
 
-        if type == 'train':
-            self.hx, self.cx = self.lstm(x, (hx, cx))
-            x = self.hx
-        elif type == 'eval':
-            self.hx_eval, self.cx_eval = self.lstm(x, (hx_eval, cx_eval))
-            x = self.hx_eval
+        self.hx, self.cx = self.lstm(x, (hx, cx))
+        x = self.hx
 
         return self.actor_linear(x)
 
