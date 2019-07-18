@@ -1,3 +1,4 @@
+import copy
 import torch
 import torch.nn as nn
 from torch.autograd import Variable
@@ -60,12 +61,16 @@ class Actor(nn.Module):
 
         #print("ACT STATE PRE LSTM: {}".format(x.shape))
         x = x.view(x.size(0), -1).to(device)
+        hx = copy.copy(self.hx)
+        cx = copy.copy(self.cx)
+        hx_eval = copy.copy(self.hx_eval)
+        cx_eval = copy.copy(self.cx_eval)
 
         if type == 'train':
-            self.hx, self.cx = self.lstm(x, (self.hx, self.cx))
+            self.hx, self.cx = self.lstm(x, (hx, cx))
             x = self.hx
         elif type == 'eval':
-            self.hx_eval, self.cx_eval = self.lstm(x, (self.hx_eval, self.cx_eval))
+            self.hx_eval, self.cx_eval = self.lstm(x, (hx_eval, cx_eval))
             x = self.hx_eval
 
         return self.actor_linear(x)
@@ -125,7 +130,10 @@ class Critic(nn.Module):
 
         #print("CRT STATE PRE LSTM: {}".format(x.shape))
         x = x.view(x.size(0), -1)
-        self.hxc, self.cxc = self.lstm(x, (self.hxc, self.cxc))
+        hxc = copy.copy(self.hxc)
+        cxc = copy.copy(self.cxc)
+
+        self.hxc, self.cxc = self.lstm(x, (hxc, cxc))
         x = self.hxc
 
         return self.critic_linear(x)

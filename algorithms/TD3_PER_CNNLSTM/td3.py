@@ -57,6 +57,7 @@ class TD3_PER_CNNLSTM:
     def update(self, replay_buffer, n_iter, batch_size, gamma, polyak, policy_noise, noise_clip, policy_delay, beta):
         
         for i in range(n_iter):
+
             # Sample a batch of transitions from replay buffer:
             state, action_, reward, next_state, done, weights, indexes = replay_buffer.sample(batch_size, beta)
 
@@ -84,7 +85,7 @@ class TD3_PER_CNNLSTM:
             current_Q1 =  self.critic_1(state, action)
             self.Q1_loss = F.mse_loss(current_Q1, target_Q)
             self.critic_1_optimizer.zero_grad()
-            self.Q1_loss.backward(retain_graph=True)
+            self.Q1_loss.backward()
             self.critic_1_optimizer.step()
             self.Q1_loss_list.append(self.Q1_loss.item())
             
@@ -92,7 +93,7 @@ class TD3_PER_CNNLSTM:
             current_Q2 = self.critic_2(state, action)
             self.Q2_loss = F.mse_loss(current_Q2, target_Q)
             self.critic_2_optimizer.zero_grad()
-            self.Q2_loss.backward(retain_graph=True)
+            self.Q2_loss.backward()
             self.critic_2_optimizer.step()
             self.Q2_loss_list.append(self.Q2_loss.item())
             
@@ -107,7 +108,7 @@ class TD3_PER_CNNLSTM:
 
                 # Optimize the actor
                 self.actor_optimizer.zero_grad()
-                self.actor_loss.backward(retain_graph=True)
+                self.actor_loss.backward()
                 self.actor_optimizer.step()
 
                 # Polyak averaging update:
