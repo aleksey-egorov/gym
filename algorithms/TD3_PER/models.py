@@ -1,7 +1,7 @@
 import torch
 import torch.nn as nn
 
-from TD3_PER.utils import weights_init, norm_col_init
+#from TD3_PER.utils import weights_init, norm_col_init
 
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 

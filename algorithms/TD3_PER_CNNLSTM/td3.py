@@ -50,15 +50,22 @@ class TD3_PER_CNNLSTM:
     
     def select_action(self, state):
         state = torch.FloatTensor(state).to(device)
-       #statem =
-        print ("select state: {}".format(state.shape))
-        act = self.actor(state, type='eval')
-        act_val = act.cpu().data.numpy().flatten()
+        statem = state
+        for i in range(self.batch_size - 1):
+            statem = torch.cat((statem, state), 0)
+
+        #print ("select state: {} statem: {}".format(state.shape, statem.shape))
+        act = self.actor(statem, type='eval')
+        actm = act[0]
+        #print ("select act: {} actm: {}".format(act.shape, act))
+        act_val = actm.cpu().data.numpy().flatten()
         return act_val
     
     def update(self, replay_buffer, n_iter, batch_size, gamma, polyak, policy_noise, noise_clip, policy_delay, beta):
         
         for i in range(n_iter):
+
+            #print ("Update {}".format(i))
 
             # Sample a batch of transitions from replay buffer:
             state, action_, reward, next_state, done, weights, indexes = replay_buffer.sample(batch_size, beta)

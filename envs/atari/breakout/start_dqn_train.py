@@ -4,7 +4,7 @@ folder = os.path.dirname('../../../algorithms/')
 sys.path.append(folder)
 
 
-from DQN_Conv.trainer import DQN_Conv_Trainer
+from DQN_CNNLSTM.trainer import DQN_CNNLSTM_Trainer
 
 
 env_name = "Breakout-v0"
@@ -15,12 +15,12 @@ epsilon_decay = 0.03
 
 random_seed = 43
 gamma = 0.99
-batch_size = 32
+batch_size = 64
 max_episodes = 10000
 max_timesteps = 3000
 max_buffer_length = 20000
 min_buffer_length = 10000
-log_interval = 10
+log_interval = 2
 threshold = 160
 
 
@@ -38,7 +38,7 @@ config = [conv_config, fc_config]
 
 
 
-agent = DQN_Conv_Trainer(env_name, config, random_seed=random_seed, lr_base=lr_base, lr_decay=lr_decay,
+agent = DQN_CNNLSTM_Trainer(env_name, config, random_seed=random_seed, lr_base=lr_base, lr_decay=lr_decay,
                    epsilon_base=epsilon_base, epsilon_decay=epsilon_decay, gamma=gamma, batch_size=batch_size,
                    max_episodes=max_episodes, max_timesteps=max_timesteps,
                    max_buffer_length=max_buffer_length, log_interval=log_interval, threshold=threshold)

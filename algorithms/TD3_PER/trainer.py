@@ -125,6 +125,7 @@ class TD3_PER_Trainer():
 
                 # select action and add exploration noise:
                 action = self.policy.select_action(state)
+                #print ("action: {}".format(action))
                 action = action + np.random.normal(0, exploration_noise, size=self.action_dim)
                 action = action.clip(self.action_low, self.action_high)
 

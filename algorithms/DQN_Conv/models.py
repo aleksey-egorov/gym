@@ -10,7 +10,7 @@ class Network(nn.Module):
         conv_config, fc_config = config
         conv_config[0]['dim'][0] = input_shape[0]
         fc_config[-1]['dim'][1] = n_actions
-        #print ("INPUT_SHAPE: {}".format(input_shape))
+        print ("INPUT_SHAPE: {}".format(input_shape))
         #print (conv_config)
 
         self.conv = ConvNet(conv_config).create().to(device)

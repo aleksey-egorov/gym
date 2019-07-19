@@ -1,6 +1,7 @@
 import copy
 import torch
 import torch.nn as nn
+import torch.nn.functional as F
 from torch.autograd import Variable
 
 from TD3_PER_CNNLSTM.utils import weights_init, norm_col_init
@@ -52,6 +53,7 @@ class Actor(nn.Module):
         #hx, cx = hid
         #state = state.unsqueeze(0)
 
+        print("STATE: {}".format(state.shape))
         #print("ACT STATE PRE CONV: {}".format(state.shape))
         x = self.lrelu1(self.conv1(state))
         #print("CRT STATE PRE CONV2: {}".format(x.shape))
@@ -67,7 +69,7 @@ class Actor(nn.Module):
         self.hx, self.cx = self.lstm(x, (hx, cx))
         x = self.hx
 
-        return self.actor_linear(x)
+        return F.softsign(self.actor_linear(x))
 
 
 class Critic(nn.Module):
