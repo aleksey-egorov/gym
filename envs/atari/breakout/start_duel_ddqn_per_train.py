@@ -8,10 +8,10 @@ from Dueling_DDQN_PER_CNNLSTM.trainer import Dueling_DDQN_PER_CNNLSTM_Trainer
 
 
 env_name = "Breakout-v0"
-lr_base = 0.00003
+lr_base = 0.0003
 lr_decay = 0.0001
 epsilon_base = 1.0
-epsilon_decay = 0.03
+epsilon_decay = 0.02
 
 random_seed = 43
 gamma = 0.99                # discount for future rewards
@@ -27,21 +27,7 @@ min_buffer_length = 10000
 log_interval = 1          # print avg reward after interval
 threshold = 200
 
-
-conv_config = [
-    {'dim': [None, 32], 'kernel': 8, 'stride': 4, 'batch_norm': False, 'activation': 'relu'},
-    {'dim': [32, 64], 'kernel': 4, 'stride': 2, 'batch_norm': False, 'activation': 'relu'},
-    {'dim': [64, 64], 'kernel': 3, 'stride': 1, 'batch_norm': False, 'activation': 'relu'},
-]
-adv_config = [
-        {'dim': [None, 512], 'dropout': False, 'activation': 'relu'},
-        {'dim': [512, None], 'dropout': False, 'activation': False},
-    ]
-val_config = [
-        {'dim': [None, 512], 'dropout': False, 'activation': 'relu'},
-        {'dim': [512, 1], 'dropout': False, 'activation': False},
-    ]
-config = [conv_config, adv_config, val_config]
+config = []
 
 
 
