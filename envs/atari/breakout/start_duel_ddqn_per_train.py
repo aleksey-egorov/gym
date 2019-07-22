@@ -4,7 +4,7 @@ folder = os.path.dirname('../../../algorithms/')
 sys.path.append(folder)
 
 
-from Dueling_DDQN_PER_Conv.trainer import Dueling_DDQN_PER_Conv_Trainer
+from Dueling_DDQN_PER_CNNLSTM.trainer import Dueling_DDQN_PER_CNNLSTM_Trainer
 
 
 env_name = "Breakout-v0"
@@ -24,7 +24,7 @@ max_episodes = 10000         # max num of episodes
 max_timesteps = 3000        # max timesteps in one episode
 max_buffer_length = 20000
 min_buffer_length = 10000
-log_interval = 10           # print avg reward after interval
+log_interval = 1          # print avg reward after interval
 threshold = 200
 
 
@@ -45,7 +45,7 @@ config = [conv_config, adv_config, val_config]
 
 
 
-agent = Dueling_DDQN_PER_Conv_Trainer(env_name, config, random_seed=random_seed, lr_base=lr_base, lr_decay=lr_decay,
+agent = Dueling_DDQN_PER_CNNLSTM_Trainer(env_name, config, random_seed=random_seed, lr_base=lr_base, lr_decay=lr_decay,
                    epsilon_base=epsilon_base, epsilon_decay=epsilon_decay, gamma=gamma, batch_size=batch_size,
                    max_episodes=max_episodes, max_timesteps=max_timesteps,
                    max_buffer_length=max_buffer_length, log_interval=log_interval, threshold=threshold,
