@@ -25,7 +25,7 @@ beta_multiplier=0.0004
 
 max_episodes = 10000         # max num of episodes
 max_timesteps = 2000        # max timesteps in one episode
-max_buffer_length = 500000
+max_buffer_length = 60000
 log_interval = 2          # print avg reward after interval
 
 

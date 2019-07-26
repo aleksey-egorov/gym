@@ -17,8 +17,8 @@ class DuelingNetwork(nn.Module):
         print("ACTION SPACE {}".format(action_space))
 
         self.batch_size = batch_size
-        self.cx = Variable(torch.zeros(self.batch_size, 256)).to(device)
-        self.hx = Variable(torch.zeros(self.batch_size, 256)).to(device)
+        self.cx = Variable(torch.zeros(self.batch_size, 512)).to(device)
+        self.hx = Variable(torch.zeros(self.batch_size, 512)).to(device)
 
         self.conv1 = nn.Conv2d(num_inputs, 32, 8, stride=4, padding=1).to(device)
         self.lrelu1 = nn.LeakyReLU(0.1)
@@ -27,10 +27,10 @@ class DuelingNetwork(nn.Module):
         self.conv3 = nn.Conv2d(64, 64, 3, stride=1, padding=1).to(device)
         self.lrelu3 = nn.LeakyReLU(0.1)
 
-        self.lstm = nn.LSTMCell(6400, 256).to(device)
-        self.adv_stream_1 = nn.Linear(256, 512).to(device)
+        self.lstm = nn.LSTMCell(6400, 512).to(device)
+        self.adv_stream_1 = nn.Linear(512, 512).to(device)
         self.adv_stream_2 = nn.Linear(512, action_space).to(device)
-        self.val_stream_1 = nn.Linear(256, 512).to(device)
+        self.val_stream_1 = nn.Linear(512, 512).to(device)
         self.val_stream_2 = nn.Linear(512, 1).to(device)
 
         self.apply(weights_init)

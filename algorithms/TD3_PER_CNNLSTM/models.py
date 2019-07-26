@@ -77,8 +77,8 @@ class Critic(nn.Module):
         super().__init__()
 
         self.batch_size = batch_size
-        self.cxc = Variable(torch.zeros(self.batch_size, 128)).to(device)
-        self.hxc = Variable(torch.zeros(self.batch_size, 128)).to(device)
+        self.cxc = Variable(torch.zeros(self.batch_size, 256)).to(device)
+        self.hxc = Variable(torch.zeros(self.batch_size, 256)).to(device)
 
         self.input_dim = num_inputs
         self.conv1 = nn.Conv1d(self.input_dim, 32, 3, stride=1, padding=1).to(device)
@@ -90,8 +90,8 @@ class Critic(nn.Module):
         self.conv4 = nn.Conv1d(64, 64, 1, stride=1).to(device)
         self.lrelu4 = nn.LeakyReLU(0.1)
 
-        self.lstm = nn.LSTMCell(1856, 128).to(device)
-        self.critic_linear = nn.Linear(128, 1).to(device)
+        self.lstm = nn.LSTMCell(1856, 256).to(device)
+        self.critic_linear = nn.Linear(256, 1).to(device)
 
         self.apply(weights_init)
         lrelu_gain = nn.init.calculate_gain('leaky_relu')

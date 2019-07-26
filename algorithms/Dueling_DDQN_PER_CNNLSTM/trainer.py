@@ -128,7 +128,7 @@ class Dueling_DDQN_PER_CNNLSTM_Trainer():
             if episode % self.log_interval == 0:
                 self.policy.save(self.directory, self.filename)
                 print(
-                    "Ep:{:5d}  Rew:{:8.2f}  Avg Rew:{:8.2f}  LR:{:8.8f}  Bf:{:2.0f}  EPS:{:0.4f}  Loss: {:5.3f}".format(
+                    "Ep:{:5d}  Rew:{:8.2f}  Avg Rew:{:8.2f}  LR:{:8.8f}  Bf:{:2.0f}  EPS:{:0.4f}  Loss: {:8.6f}".format(
                         episode, ep_reward, avg_reward, learning_rate, self.replay_buffer.get_fill(),
                         epsilon, avg_Q_loss))
 
@@ -140,7 +140,7 @@ class Dueling_DDQN_PER_CNNLSTM_Trainer():
             # if avg reward > threshold then save and stop traning:
             if avg_reward >= self.threshold:
                 print(
-                    "Ep:{:5d}  Rew:{:8.2f}  Avg Rew:{:8.2f}  LR:{:8.8f}  Bf:{:2.0f}  EPS:{:0.4f}  Loss: {:5.3f}".format(
+                    "Ep:{:5d}  Rew:{:8.2f}  Avg Rew:{:8.2f}  LR:{:8.8f}  Bf:{:2.0f}  EPS:{:0.4f}  Loss: {:8.6f}".format(
                         episode, ep_reward, avg_reward, learning_rate, self.replay_buffer.get_fill(),
                         epsilon, avg_Q_loss))
                 print("########## Solved! ###########")
