@@ -7,14 +7,14 @@ sys.path.append(folder)
 from TD3_PER_CNNLSTM.trainer import TD3_PER_CNNLSTM_Trainer
 
 env_name = 'BipedalWalkerHardcore-v2'
-lr_base = 0.001
+lr_base = 0.0001
 lr_decay = 0.002
 exp_noise_base = 1.0
 exp_noise_decay = 0.01  #0.0001
 
 random_seed = 42
 gamma = 0.99                # discount for future rewards
-batch_size = 256       # num of transitions sampled from replay buffer
+batch_size = 128       # num of transitions sampled from replay buffer
 polyak = 0.9999              # target policy update parameter (1-tau)
 policy_noise = 0.2          # target policy smoothing noise
 noise_clip = 0.5
@@ -25,7 +25,7 @@ beta_multiplier=0.0004
 
 max_episodes = 10000         # max num of episodes
 max_timesteps = 2000        # max timesteps in one episode
-max_buffer_length = 4000000
+max_buffer_length = 500000
 log_interval = 2          # print avg reward after interval
 
 
