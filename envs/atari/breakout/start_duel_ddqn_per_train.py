@@ -7,7 +7,7 @@ sys.path.append(folder)
 from Dueling_DDQN_PER_CNNLSTM.trainer import Dueling_DDQN_PER_CNNLSTM_Trainer
 
 
-env_name = "BreakoutNoFrameskip-v4"
+env_name = "Breakout-v4"
 lr_base = 0.001
 lr_decay = 0.008
 epsilon_base = 1.0
@@ -22,7 +22,7 @@ beta_multiplier=0.001
 
 max_episodes = 10000         # max num of episodes
 max_timesteps = 10000        # max timesteps in one episode
-max_buffer_length = 12000
+max_buffer_length = 30000
 min_buffer_length = 1000
 log_interval = 1          # print avg reward after interval
 threshold = 200

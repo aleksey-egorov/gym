@@ -128,9 +128,9 @@ class Dueling_DDQN_PER_CNNLSTM_Trainer():
             if episode % self.log_interval == 0:
                 self.policy.save(self.directory, self.filename)
                 print(
-                    "Ep:{:5d}  Rew:{:8.2f}  Avg Rew:{:8.2f}  LR:{:8.8f}  Bf:{:2.0f}  EPS:{:0.4f}  Loss: {:8.6f}".format(
+                    "Ep:{:5d}  Rew:{:8.2f}  Avg Rew:{:8.2f}  LR:{:8.8f}  Bf:{:2.0f}  EPS:{:0.4f}  Beta:{:0.4f}  Loss: {:8.6f}".format(
                         episode, ep_reward, avg_reward, learning_rate, self.replay_buffer.get_fill(),
-                        epsilon, avg_Q_loss))
+                        epsilon, beta, avg_Q_loss))
 
             self.writer.add_scalar("reward", ep_reward, episode)
             self.writer.add_scalar("avg_reward", avg_reward, episode)
@@ -140,9 +140,9 @@ class Dueling_DDQN_PER_CNNLSTM_Trainer():
             # if avg reward > threshold then save and stop traning:
             if avg_reward >= self.threshold:
                 print(
-                    "Ep:{:5d}  Rew:{:8.2f}  Avg Rew:{:8.2f}  LR:{:8.8f}  Bf:{:2.0f}  EPS:{:0.4f}  Loss: {:8.6f}".format(
+                    "Ep:{:5d}  Rew:{:8.2f}  Avg Rew:{:8.2f}  LR:{:8.8f}  Bf:{:2.0f}  EPS:{:0.4f}  Beta:{:0.4f}  Loss: {:8.6f}".format(
                         episode, ep_reward, avg_reward, learning_rate, self.replay_buffer.get_fill(),
-                        epsilon, avg_Q_loss))
+                        epsilon, beta, avg_Q_loss))
                 print("########## Solved! ###########")
                 name = self.filename + '_solved'
                 self.policy.save(self.directory, name)

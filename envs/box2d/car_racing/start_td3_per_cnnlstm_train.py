@@ -6,7 +6,7 @@ sys.path.append(folder)
 
 from TD3_PER_CNNLSTM.trainer import TD3_PER_CNNLSTM_Trainer
 
-env_name = 'BipedalWalkerHardcore-v2'
+env_name = 'CarRacing-v0'
 lr_base = 0.001
 lr_decay = 0.002
 exp_noise_base = 1.0
@@ -14,7 +14,7 @@ exp_noise_decay = 0.01  #0.0001
 
 random_seed = 42
 gamma = 0.99                # discount for future rewards
-batch_size = 64     # num of transitions sampled from replay buffer
+batch_size = 128       # num of transitions sampled from replay buffer
 polyak = 0.999              # target policy update parameter (1-tau)
 policy_noise = 0.2          # target policy smoothing noise
 noise_clip = 0.5
