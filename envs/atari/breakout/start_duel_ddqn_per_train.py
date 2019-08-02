@@ -7,15 +7,15 @@ sys.path.append(folder)
 from Dueling_DDQN_PER_CNNLSTM.trainer import Dueling_DDQN_PER_CNNLSTM_Trainer
 
 
-env_name = "Breakout-v4"
+env_name = "BreakoutNoFrameskip-v4"
 lr_base = 0.001
 lr_decay = 0.008
 epsilon_base = 1.0
 epsilon_decay = 0.02
 
 random_seed = 42
-gamma = 0.995                # discount for future rewards
-batch_size = 64      # num of transitions sampled from replay buffer
+gamma = 0.999                # discount for future rewards
+batch_size = 128      # num of transitions sampled from replay buffer
 alpha=0.9
 beta_base=0.3
 beta_multiplier=0.001

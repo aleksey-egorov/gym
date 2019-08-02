@@ -61,6 +61,7 @@ class Dueling_DDQN_PER_CNNLSTM:
         done_mask = torch.ByteTensor(dones).to(device)
 
         state_action_values = self.net(states_v).to(device)
+        #print ("STATE ACTION: {}".format(state_action_values.shape))
         state_action_values = state_action_values.gather(1, actions_v.unsqueeze(-1)).to(device).squeeze(-1)
 
         # Double DQN update rule
