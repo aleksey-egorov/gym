@@ -1,9 +1,16 @@
 from __future__ import division
 import numpy as np
 import torch
+import os
 import json
 import logging
 
+
+def mkdir(base, name):
+    path = os.path.join(base, name)
+    if not os.path.exists(path):
+        os.makedirs(path)
+    return path
 
 def setup_logger(logger_name, log_file, level=logging.INFO):
     l = logging.getLogger(logger_name)

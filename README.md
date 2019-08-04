@@ -8,5 +8,6 @@ For better performance or production purposes I recommend using <a href='https:/
 ### Some solved environments
 
 <img align=left height=160 src='envs/atari/pong/results/duel_ddqn.gif'>
+<img align=left height=160 src='envs/atari/breakout/results/a3c.gif'>
 <img align=left height=160 src='envs/box2d/bipedal_walker_hardcore/results/ac3.gif'>
 <img align=left height=160 src='envs/box2d/lunar_lander_continuous/results/td3.gif'>

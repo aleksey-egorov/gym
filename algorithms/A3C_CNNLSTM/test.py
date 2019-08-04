@@ -6,7 +6,7 @@ import torch
 from PIL import Image
 
 from A3C_CNNLSTM.environment import atari_env
-from A3C_CNNLSTM.utils import setup_logger
+from A3C_CNNLSTM.utils import setup_logger, mkdir
 from A3C_CNNLSTM.model import A3Clstm
 from A3C_CNNLSTM.player_util import Agent
 
@@ -46,7 +46,9 @@ def test(args, shared_model, env_conf):
             player.state = player.state.cuda()
     flag = True
     max_score = 0
+
     t = 0
+    ep = 0
 
     while True:
         if flag:
@@ -65,10 +67,10 @@ def test(args, shared_model, env_conf):
             player.env.render()
 
         if args['save_gif'] == True:
-            mkdir('gif', '1')
+            mkdir('gif', str(ep))
             img = player.env.render(mode='rgb_array')
             img = Image.fromarray(img)
-            img.save('gif/1/{}.jpg'.format(t))
+            img.save('gif/{}/{}.jpg'.format(str(ep), t))
             t += 1
 
         reward_sum += player.reward
@@ -80,6 +82,7 @@ def test(args, shared_model, env_conf):
             if gpu_id >= 0:
                 with torch.cuda.device(gpu_id):
                     player.state = player.state.cuda()
+
         elif player.info:
             flag = True
             num_tests += 1
